@@ -575,3 +575,291 @@ while True:
     
     if Game_completed:
         Credits()
+import pygame
+import sys
+
+# Initialize Pygame
+pygame.init()
+
+# Screen settings
+SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Z-Legends: Exceedra's Awakening")
+
+# Colors and Fonts
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+TITLE_FONT = pygame.font.Font("animeace2_reg.ttf", 30)  # Title font size
+DIALOGUE_FONT = pygame.font.Font("animeace2_reg.ttf", 21)  # Dialogue font size
+HINT_FONT = pygame.font.Font("animeace2_reg.ttf", 12)  # Hint font size
+
+# Background Images
+background_title = pygame.image.load("title_background.png")  # Title screen background
+background_title = pygame.transform.scale(background_title, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+dreamspace = pygame.image.load("dreamspace.png")  # Scene 1 background
+dreamspace = pygame.transform.scale(dreamspace, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+school = pygame.image.load("school.png")  # Scene 2 background
+school = pygame.transform.scale(school, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+battle_background = pygame.image.load("battle_background.png")  # Battle scene background
+battle_background = pygame.transform.scale(battle_background, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+# Character Images
+main_character = pygame.image.load("main_character.png")  # Main character sprite
+main_character = pygame.transform.scale(main_character, (150, 150))
+
+enemy = pygame.image.load("enemy.png")  # Enemy sprite
+enemy = pygame.transform.scale(enemy, (150, 150))
+
+# Game State
+scene = "start_menu"  # Start with the start menu
+dialogue_index = 0
+running = True
+battle_mode = False
+
+# Battle Stats
+player_hp = 100
+player_energy = 100
+enemy_hp = 100
+
+# Dialogue for Scene 1
+scene_1_dialogue = [
+    "[Exceedra awakes in a dark dreamspace]",
+    "Overlord: Welcome, Son. It’s been a while since you last came here.",
+    "Exceedra: What do you want?",
+    "Overlord: Nothing much. Except to know how my son is doing.",
+    "[Exceedra grins angrily.]",
+    "Exceedra: Yea right. What do you really want?",
+    "Overlord: You do realize you wandered in here on your own, right?",
+    "[Exceedra is shocked.]",
+    "Exceedra: Wait, what? Why would I come here…",
+    "Overlord: [worried] Look. I’ve been watching you. Your life on Earth is becoming more and more miserable.",
+    "Overlord: It’s sad to watch. You’re getting nothing back out of the good you’re doing.",
+    "Overlord: If you’d only obey my instructions, you wouldn’t have so many problems.",
+    "Overlord: I’m positive that if you start killing people, you should get closer to what you want.",
+    "Exceedra: [firmly] Killing is not the path forward.",
+    "Overlord: [grandiose] THEN WHAT IS, OH GREAT DRAGON PRINCE? [Grips Exceedra.]",
+    "Overlord: The path forward is the one you make yourself. There is no other path.",
+    "Overlord: Only you can make the path that will get you to what you want.",
+    "Overlord: Do you seriously believe you can stay the way you are and one day you will get what you want? Naive little boy!",
+    "[Overlord ungrips and continues.]",
+    "Overlord: You can’t trust humans. They will always disappoint you.",
+    "Overlord: They will always be better than you. They’ll always have what you want.",
+    "Overlord: They can’t understand you, Exceedra. They’re just humans.",
+    "Overlord: They aren’t Gods. They can’t give you what you want.",
+    "Exceedra: [angrily] So?",
+    "Overlord: [foreboding] Just kill them. You don’t need things that don’t help you.",
+    "Overlord: Listen, kiddoboy, if you don’t believe, then just pick a number. Any number.",
+    "Overlord: [foreboding] No matter the number you pick… the humans will betray you.",
+    "Overlord: The path forward is the path you will have to make yourself. So choose.",
+    "Overlord: Let go of your childish human hope or take the reins of your existence on Earth and kill the humans so you can finally establish your empire.",
+    "[Overlord looks as if to the future, disappointed and worried.]",
+    "Overlord: It’s only a matter of time now before there is nothing left to fight for.",
+    "Exceedra: [worried] What do you mean?",
+    "Overlord: [ignoring, looking directly at Exceedra] Just kill the humans and take what you want. You won’t regret it.",
+    "[Exceedra prepares to leave.]",
+    "Overlord: You can take 1 million more steps on the path you’re walking on and still not get where you want to go.",
+    "[Exceedra stops.]",
+    "Overlord: You can blame God as much as you want, but you’re the one making the path forward.",
+    "Overlord: You’re the one who needs to change. You need to listen to me!",
+    "Exceedra: [interrupting, screaming] NO! THE PATH FORWARD IS THE ONE I WILL MAKE MYSELF, BUT IT’S NOT MY FAULT GOD ISN’T GIVING ME WHAT IS RIGHTFULLY MINE.",
+    "Exceedra: I WILL RULE THIS PLANET AND TAKE WHAT IS RIGHTFULLY MINE. I just… [struggling to continue.]",
+    "[Exceedra walks away. Before leaving, looks back.]",
+    "Exceedra: I’ll figure it out. I have to. For the sake of the plot."
+]
+
+# Dialogue for Scene 2
+scene_2_dialogue = [
+    "[Exceedra goes to school and greets his friends. It's lunchtime; he meets Hydranoid and Destiny.]",
+    "Exceedra: [happily] Hey!",
+    "Destiny: Hi Captain! How’s it going?",
+    "Exceedra: [grinning] Ace positively amazing! [Shows his math test] Rightfully got another 100.",
+    "Hydranoid: Congratulations, Captain. As usual, you get what you want.",
+    "Exceedra: [pissed, frowning at his twin] And what’s that supposed to mean?",
+    "Hydranoid: [smiling] You’d be crying right now if you didn’t get 100. tease Remember last time?",
+    "Exceedra: [dark, takes a step towards Hydranoid] Don’t push it.",
+    "Destiny: [gets in between them] Cap, that’s enough!",
+    "Hydranoid: [calmly, to Exceedra] Now now, chill. You know I’m in no mood to make you angry.",
+    "[They go sit down and start eating.]",
+    "Hydranoid: [curious tone] Though, I wonder how you’re going to react if you don’t get 100 on Chem. You better not throw a tantrum like last time.",
+    "Exceedra: [leans in and Hydranoid and pulls out his tails, very pissed] Are you calling me an idiot?",
+    "Hydranoid: [still calmly] Nope. I just don’t want you to embarrass yourself.",
+    "Hydranoid: Wouldn’t bring you closer to what you’re looking for, you know what I mean? [Looks Exceedra in the eye, challenging.]",
+    "Exceedra: [grinning darkly] You’re right, Hydranoid. No need for a spanking. [Sits down and resumes eating.]",
+    "Hydranoid: [eating, until he realises something. In a pointing-out tone] Though, I’m pretty sure Den probably got 100.",
+    "[Exceedra, completely pissed, gets up, pulls out his tails.]",
+    "Exceedra: [angry as f*] WHERE ARE YOU GETTING AT, LITTLE BROTHER?",
+    "Hydranoid: [unaware] Huh?",
+    "Destiny: Uh oh…",
+    "[Exceedra, fully pissed, triggers a battle.]",
+    "[BATTLE]",
+    "[Hydranoid is defeated. Stands up, scratching his head, smiling.]",
+    "Hydranoid: You really are strong, Captain. No wonder you’re the Lagoon.",
+    "Exceedra: Don’t piss me off like that again, little brother.",
+    "[Hydranoid: All right… Exz offers his hand so Hyde can get up. Image of the two strongly together.]",
+    "Hydranoid: [noticing] Is something up?",
+    "Exceedra: [surprised by his brother noticing something’s up with him] Hein! No I’m good.",
+    "Destiny: [sad] It’s just that… these past few days, you’ve seemed… more distant.",
+    "Exceedra: Distant? Nah. I’m Ace Positive. [Poses, grinning.]",
+    "Hydranoid: [direct] You sure not having a girlfriend doesn’t bother you?",
+    "Destiny: [slaps her hand on her brother’s head] Hydranoid!",
+    "Exceedra: [sad] No, Destiny, it’s all right… Truth be told, [puts his hand to his heart and grips it] it does hurt.",
+    "Exceedra: But the path forward is the one we make together. That’s more than enough for me.",
+    "Hydranoid: Did you hear back anything from the job you applied to?",
+    "Exceedra: Huuuuuuuuuuuuuuuuuuuuuuuuh…",
+    "Hydranoid: Oh my. Nothing!",
+    "[Exceedra nods in shame.]",
+    "Hydranoid: Nothing to be ashamed of, big brother. Life on Earth always makes no sense from what I’ve seen.",
+    "Hydranoid: You don’t have a girlfriend, you have no job, you have no G2, and you can’t get 100.",
+    "Hydranoid: Meanwhile… [stares at the other side of the atrium, where their group of IB friends are happily chatting.]",
+    "Exceedra: It won’t be like that for long. heroically For the sake of the plot, I’m gonna catch up.",
+    "Hydranoid: Well at least you have powers. That’s the one thing humans can’t have that you do.",
+    "Exceedra: [dark, and taking a dark face] Well… even that has its troubles…",
+    "[Hydranoid catches the dark tone and gets curious, but he decides to let it go for later.]",
+    "Hydranoid: [taking one last bite] Are we still on for the mission later?",
+    "Exceedra: also done his food, getting up Aye. We’re gonna rat out the rat and kick him in the butt right to the other side of the galaxy!",
+    "[Hydranoid and Exceedra, face to face, smiling at each other.]",
+    "Hydranoid: [happy and serious] Well said, Cap! Let’s go kick butt… after Chem.",
+    "[They all part ways.]"
+]
+
+# Render text with wrapping
+def draw_text(surface, text, font, x, y, color=BLACK, max_width=SCREEN_WIDTH-40):
+    words = text.split(' ')
+    lines = []
+    current_line = ""
+
+    # Wrap text
+    for word in words:
+        test_line = current_line + ' ' + word if current_line else word
+        if font.size(test_line)[0] <= max_width:
+            current_line = test_line
+        else:
+            lines.append(current_line)
+            current_line = word
+
+    lines.append(current_line)
+
+    y_offset = y
+    for line in lines:
+        text_surface = font.render(line, True, color)
+        surface.blit(text_surface, (x, y_offset))
+        y_offset += font.get_height()
+
+# Draw text box
+def draw_text_box():
+    pygame.draw.rect(screen, WHITE, (0, SCREEN_HEIGHT - 120, SCREEN_WIDTH, 120))  # Bottom box
+    pygame.draw.rect(screen, BLACK, (0, SCREEN_HEIGHT - 120, SCREEN_WIDTH, 120), 5)  # Border
+
+# Draw hint text
+def draw_hint_text():
+    hint_text = "Press Enter to continue, Backspace to go back"
+    hint_surface = HINT_FONT.render(hint_text, True, BLACK)
+    hint_x = SCREEN_WIDTH - hint_surface.get_width() - 10  # Align to the bottom-right corner
+    hint_y = SCREEN_HEIGHT - 20  # Above the bottom of the box
+    screen.blit(hint_surface, (hint_x, hint_y))
+
+# Show battle screen
+def battle_screen():
+    global player_hp, player_energy, enemy_hp
+
+    screen.blit(battle_background, (0, 0))  # Battle background
+    screen.blit(main_character, (100, SCREEN_HEIGHT - 300))  # Main character position
+    screen.blit(enemy, (SCREEN_WIDTH - 250, SCREEN_HEIGHT - 300))  # Enemy position
+
+    # Draw stats
+    draw_text(screen, f"HP: {player_hp}", DIALOGUE_FONT, 20, 20, RED)
+    draw_text(screen, f"Energy: {player_energy}", DIALOGUE_FONT, 20, 50, BLUE)
+    draw_text(screen, f"Enemy HP: {enemy_hp}", DIALOGUE_FONT, SCREEN_WIDTH - 200, 20, RED)
+
+    # Draw action buttons
+    button_width, button_height = 150, 50
+    button_spacing = 20
+    button_y = SCREEN_HEIGHT - 100
+
+    attack_rect = pygame.Rect(50, button_y, button_width, button_height)
+    guard_rect = pygame.Rect(50 + button_width + button_spacing, button_y, button_width, button_height)
+    recovery_rect = pygame.Rect(50 + 2 * (button_width + button_spacing), button_y, button_width, button_height)
+
+    pygame.draw.rect(screen, RED, attack_rect)
+    pygame.draw.rect(screen, GREEN, guard_rect)
+    pygame.draw.rect(screen, BLUE, recovery_rect)
+
+    draw_text(screen, "Attack", DIALOGUE_FONT, attack_rect.x + 25, attack_rect.y + 10, WHITE)
+    draw_text(screen, "Guard", DIALOGUE_FONT, guard_rect.x + 30, guard_rect.y + 10, WHITE)
+    draw_text(screen, "Recover", DIALOGUE_FONT, recovery_rect.x + 20, recovery_rect.y + 10, WHITE)
+
+    return attack_rect, guard_rect, recovery_rect
+
+# Show title screen
+def show_start_menu():
+    screen.blit(background_title, (0, 0))  # Title background
+    draw_text(screen, "Z-Legends: Exceedra's Awakening", TITLE_FONT, 90, 200, BLACK)  # Title
+    draw_text(screen, "Press Enter to Start", DIALOGUE_FONT, 235, 300, BLACK)  # Prompt
+    pygame.display.flip()
+
+# Main Game Loop
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.KEYDOWN:
+            if not battle_mode:
+                if event.key == pygame.K_RETURN:  # On Enter key
+                    if scene == "start_menu":
+                        scene = "scene_1"
+                        dialogue_index = 0
+                    elif scene == "scene_1" and dialogue_index < len(scene_1_dialogue):
+                        dialogue_index += 1
+                        if dialogue_index >= len(scene_1_dialogue):
+                            scene = "scene_2"
+                            dialogue_index = 0
+                    elif scene == "scene_2" and dialogue_index < len(scene_2_dialogue):
+                        dialogue_index += 1
+                        if dialogue_index >= len(scene_2_dialogue):
+                            battle_mode = True  # Trigger battle
+                    elif scene == "scene_2" and battle_mode:
+                        # Handle battle mechanics
+                        pass
+                elif event.key == pygame.K_BACKSPACE:  # On Backspace key
+                    if dialogue_index > 0:
+                        dialogue_index -= 1  # Go to previous line
+                    else:
+                        dialogue_index = 0  # Keep at the first line
+        elif event.type == pygame.MOUSEBUTTONDOWN and battle_mode:
+            mouse_pos = event.pos
+            attack_rect, guard_rect, recovery_rect = battle_screen()
+            if attack_rect.collidepoint(mouse_pos):
+                enemy_hp -= 20  # Attack action
+            elif guard_rect.collidepoint(mouse_pos):
+                # Guard action logic
+                pass
+            elif recovery_rect.collidepoint(mouse_pos):
+                player_hp = min(100, player_hp + 20)  # Recovery action
+
+    if battle_mode:
+        battle_screen()
+    elif scene == "start_menu":
+        show_start_menu()
+    elif scene == "scene_1":
+        screen.blit(dreamspace, (0, 0))
+        draw_text_box()
+        if dialogue_index < len(scene_1_dialogue):
+            draw_text(screen, scene_1_dialogue[dialogue_index], DIALOGUE_FONT, 20, SCREEN_HEIGHT - 110)
+        draw_hint_text()  # Display hint
+    elif scene == "scene_2":
+        screen.blit(school, (0, 0))
+        draw_text_box()
+        if dialogue_index < len(scene_2_dialogue):
+            draw_text(screen, scene_2_dialogue[dialogue_index], DIALOGUE_FONT, 20, SCREEN_HEIGHT - 110)
+        draw_hint_text()  # Display hint
+
+    pygame.display.flip()
+
+pygame.quit()
+sys.exit()
