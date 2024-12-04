@@ -1,4 +1,4 @@
-#Made by LordZagger and Jin4843, November-December 2024
+#Made by LordZagger and Jin4843, November-December 2024, made public dec 3,2024
 
 #import modules
 import pygame
