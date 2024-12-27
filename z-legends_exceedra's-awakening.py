@@ -1,4 +1,3 @@
-#Made by LordZagger and Jin4843 from November 2024-Present
 #Comments in first person by LordZagger
 #import needed modules and functions
 import pygame                 #duh
@@ -47,6 +46,7 @@ battle_ON = False #if a battle is in progress
 battle_e1_s2 = False
 battle_e1_s4 = False
 battle_e1_s5 = False
+battle_e2_s1 = False
 Episode1_completed = False
 Episode2_completed = False
 Episode3_completed = False
@@ -613,7 +613,7 @@ def make_button(text,font,text_size,text_color,x,y,button_width,button_height,bu
             dialogue_index = 0
             if action == 'scene_1':
                 playMusic(Dreamspace_theme,'music',Forever=True)
-        if scene in ['battle_e1_s2','battle_e1_s4','battle_e1_s5']:
+        if scene in ['battle_e1_s2','battle_e1_s4','battle_e1_s5','battle_e2_s1']:
             if action == 'quit': #to quit the game after losing a battle
                 pygame.quit()
                 sys.exit()
@@ -780,7 +780,7 @@ def Battle(character1,character2,background,battle_name):
     battle_name is to keep track of what battle is going on; the battle's corresponding scene has the same name
     '''
     #start the battle    
-    global Locked1, Locked2, dialogue_index, battle_ON, battle_e1_s2, battle_e1_s4, battle_e1_s5, CH1, CH2, BACKGROUND, ZE_BATTLE, pause, scene
+    global Locked1, Locked2, dialogue_index, battle_ON, battle_e1_s2, battle_e1_s4, battle_e1_s5, battle_e2_s1, CH1, CH2, BACKGROUND, ZE_BATTLE, pause, scene
     #save the parameters in the global variables so we can use them in external functions (functions not directly connected to this one) requiring them
     CH1 = character1
     CH2 = character2
@@ -796,7 +796,7 @@ def Battle(character1,character2,background,battle_name):
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 # if event.key == pygame.K_1: #cheat out (debugging purposes)
-                #     battle_ON, battle_e1_s2, battle_e1_s4, battle_e1_s5, scene = False, False, False, False, 'scene_5'
+                #     battle_ON, battle_e1_s2, battle_e1_s4, battle_e1_s5, battle_e2_s1, scene = False, False, False, False, False, 'scene_5'
                 #     pygame.mixer.music.stop()
                 #     dialogue_index += 1
                 #     pygame.display.flip()
@@ -815,6 +815,8 @@ def Battle(character1,character2,background,battle_name):
             elif battle_name == 'battle_e1_s4' or battle_name == 'battle_e1_s5':
                 character1.BattlePosition(0, SCREEN_HEIGHT-500) #exceedra
                 character2.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-500) #akobos/nightmare
+            elif battle_name == 'battle_e2_s1':
+                pass
                     
             #controlling energy and buttons for character 1 (usually Exceedra)
             if character1.energy < character1.AttackMove.energy_consumption or character1.energy < character1.GuardMove.energy_consumption:
@@ -943,6 +945,9 @@ while running:
                     if scene == "scene_1" and dialogue_index < len(scene_1_dialogue):
                         dialogue_index += 1
                         playMusic(press_button_sound,'sound')
+                        if dialogue_index == 38:
+                            pygame.mixer.music.stop()
+                            playMusic(ExceedraLonelyTheme1,'music',Forever=True)
                         if dialogue_index >= len(scene_1_dialogue):
                             pygame.mixer.music.stop()
                             scene = "scene_2"
@@ -1022,6 +1027,10 @@ while running:
                             Episode1_completed = True
                             scene = "start_menu"
                             dialogue_index = -1
+                    
+                    if scene == 'scene_6': #{TO UPDATE}
+                        #dialogue_index += 1
+                        playMusic(press_button_sound,'sound')
                             
                 if event.key == pygame.K_BACKSPACE:  # On Backspace key
                     if dialogue_index > 0:
@@ -1156,6 +1165,9 @@ while running:
     if scene == 'scene_6':
         screen.fill(BLUE)
         make_text('EPISODE 2 WILL BE READY SOON! :)',"comicsansms",65,white,SCREEN_WIDTH/2,SCREEN_HEIGHT/2)
+    
+    if scene == 'battle_e2_s1': #{TO UPDATE}
+        pass
     
     #credits when the game is completed (after Game_completed is made True)
     if scene == 'credits':
