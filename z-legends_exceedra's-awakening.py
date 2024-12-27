@@ -56,6 +56,7 @@ CH1 = '' #for restarting battles, we save the battle function call parameters in
 CH2 = ''
 BACKGROUND = ''
 ZE_BATTLE = ''
+MUSIC = ''
 
 #Music and sounds
 press_button_sound = 'pokemon-a-button.wav'
@@ -475,8 +476,8 @@ NullMove = Move('Play Dead',0,None,0,0) #nothing, just for characters who aren't
 DestinyAttack = Move('Time Pulse',30,'ATTACK',0,15) #destiny is available for battle in episode 2
 DestinyGuard = Move('Time Stop',0,'GUARD',0,5)
 DestinyRecover = Move('Centered',0,'RECOVER',10,0)
-OverlordAttack = Move('Dark En',40,'ATTACK',0,10) #overlord battle is in episode 2
-OverlordGuard = Move('Black Shield',0,'GUARD',0,2)
+OverlordAttack = Move('Dark En',50,'ATTACK',0,30) #overlord battle is in episode 2
+OverlordGuard = Move('Black Shield',0,'GUARD',0,5)
 OverlordRecover = Move('Shadow Bath',0,'RECOVER',25,0)
 
 #characters
@@ -597,7 +598,7 @@ def make_button(text,font,text_size,text_color,x,y,button_width,button_height,bu
     Type is for me, to see if it's a menu or battle button
     '''
     #all possible things with the button (when clicking)
-    global scene, dialogue_index, Locked, CH1, CH2, BACKGROUND, ZE_BATTLE #lots of global variables to consider
+    global scene, dialogue_index, Locked, CH1, CH2, BACKGROUND, ZE_BATTLE, MUSIC #lots of global variables to consider
     
     #collision detection with the mouse (unfortunately we gotta redefine the mouse in here too)
     rect = pygame.Rect(x,y,button_width,button_height)
@@ -622,7 +623,8 @@ def make_button(text,font,text_size,text_color,x,y,button_width,button_height,bu
                 CH1 = CH1.reset()
                 CH2 = CH2.reset()
                 #start the battle
-                action(CH1, CH2, BACKGROUND, ZE_BATTLE)
+                playMusic(MUSIC,'music',Forever=True)
+                action(CH1, CH2, BACKGROUND, ZE_BATTLE, MUSIC)
             if action == None:
                 print("Nuh-Uh! Use your own moves (or Recover if that's the situation you're in!)") #aka do nothing; no worries, this won't cause a turn to go by, since the opponent also won't do anything (he only does things when Attack, Guard or Recover)
             if action in [Attack,Guard,Recover]: #the battle moves
@@ -663,7 +665,7 @@ def Menu():
 # CH2 = Hydranoid
 # BACKGROUND = school
 # ZE_BATTLE = 'battle_e1_s2'
-def try_again(character1,character2,background,battle_name):
+def try_again(character1,character2,background,battle_name,music):
     '''tell the user to try again after losing a battle'''
     #lost the battle sound    
     playMusic(BattleLost,'sound')
@@ -711,12 +713,6 @@ def Attack(character1,character2):
         else:
             character1.losePower(character2.AttackMove.damage,0)
             character2.losePower(0,character2.AttackMove.energy_consumption)
-    
-    #if health becomes negative after taking damage, set health to 0 for the check in the Battle function
-    if character1.health < 0:
-        character1.health = 0
-    if character2.health < 0:
-        character2.health = 0
         
     print(character1.name,'did ATTACK;',character2.name,'did',opponent_move.specialty) #description of the turn
 
@@ -772,7 +768,7 @@ def Recover(character1,character2):
     print(character1.name,'did RECOVER;',character2.name,'did',opponent_move.specialty) #description of the turn
         
 #run the battle      
-def Battle(character1,character2,background,battle_name):
+def Battle(character1,character2,background,battle_name,music):
     '''function for battles
     next_scene is function call of following scene in story
     character1 is playable character (usually Exceedra)
@@ -780,12 +776,13 @@ def Battle(character1,character2,background,battle_name):
     battle_name is to keep track of what battle is going on; the battle's corresponding scene has the same name
     '''
     #start the battle    
-    global Locked1, Locked2, dialogue_index, battle_ON, battle_e1_s2, battle_e1_s4, battle_e1_s5, battle_e2_s1, CH1, CH2, BACKGROUND, ZE_BATTLE, pause, scene
+    global Locked1, Locked2, dialogue_index, battle_ON, battle_e1_s2, battle_e1_s4, battle_e1_s5, battle_e2_s1, CH1, CH2, BACKGROUND, ZE_BATTLE, MUSIC, pause, scene
     #save the parameters in the global variables so we can use them in external functions (functions not directly connected to this one) requiring them
     CH1 = character1
     CH2 = character2
     BACKGROUND = background
     ZE_BATTLE = battle_name
+    MUSIC = music
     
     #during the battle
     while battle_ON:
@@ -852,12 +849,12 @@ def Battle(character1,character2,background,battle_name):
                 make_button(character2.RecoverMove.name,'Corbel',15,GREEN,1000,600,100,70,yellow,pale_yellow,'battle',None)
                         
             #losing
-            if character1.health == 0 and character2.health > 0:
+            if character1.health <= 0 and character2.health > 0:
                 pygame.mixer.music.stop()
-                try_again(character1,character2,background,battle_name)
+                try_again(character1,character2,background,battle_name,music)
             
             #winning
-            if character1.health > 0 and character2.health == 0:
+            if character1.health > 0 and character2.health <= 0:
                 pygame.mixer.music.stop()
                 playMusic(BattleWon,'sound')
                 if battle_name == 'battle_e1_s2':
@@ -1073,7 +1070,7 @@ while running:
     
     #battle in episode 1, scene 2: Exceedra VS Hydranoid
     if scene == 'battle_e1_s2':
-        Battle(ExceedraMain,Hydranoid,school,'battle_e1_s2')
+        Battle(ExceedraMain,Hydranoid,school,'battle_e1_s2',BattleTheme1)
             
     #episode 1, scene 3
     if scene == "scene_3":
@@ -1123,7 +1120,7 @@ while running:
     
     #battle in episode 1, scene 4: Exceedra VS Akobos
     if scene == 'battle_e1_s4':
-        Battle(ExceedraMain,Akobos,hill,'battle_e1_s4')
+        Battle(ExceedraMain,Akobos,hill,'battle_e1_s4',AkobosBattle)
     
     #episode 1, scene 5
     if scene == "scene_5":
@@ -1159,7 +1156,7 @@ while running:
     
     #battle in episode 1, scene 5: Exceedra VS Nightmare
     if scene == 'battle_e1_s5':
-        Battle(ExceedraMain,Nightmare,dreamspace,'battle_e1_s5')
+        Battle(ExceedraMain,Nightmare,dreamspace,'battle_e1_s5',NightmareBattle)
             
     #episode 2, scene 1 (aka scene 6)
     if scene == 'scene_6':
