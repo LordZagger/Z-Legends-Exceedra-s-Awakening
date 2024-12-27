@@ -230,7 +230,7 @@ scene_2_dialogue = [
 ]
 #Scene 3
 scene_3_dialogue = [
-    "[Library. Exceedra and his classmates/friends Ken, Grace and Finlay are at a table, working… but actually really just talking.",
+    "[Library. Exceedra and his classmates/friends Ken, Grace and Finlay are at a table, working… but actually really just talking.]",
     "Finlay: [screwed] Bro, Politique is actually bad. I haven’t started the video and it’s due Friday.",
     "Exceedra: [reprimanding] Bro, Finlay, what is wrong with you! Get started already! [Banging on the table] LOCK IN!",
     "Ken: [mocking] That’s what you get for choosing Politics.",
