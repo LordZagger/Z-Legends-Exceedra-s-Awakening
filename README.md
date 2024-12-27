@@ -6,5 +6,5 @@ Of course, the GitHub reposity also has the python game file
 
 wav files are music, png files are images, py file is the game
 
-There were issues with the game on the release of Dec 3rd, so Jeremy fixed the issues from Dec 24-26
+There were issues with the game on the release of Dec 3rd, so Jeremy fixed the issues from Dec 24-27
 We recommend playing the game on a software like Spyder, as there are some console prompts to keep track off during battles
