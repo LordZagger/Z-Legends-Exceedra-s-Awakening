@@ -43,16 +43,16 @@ running = True
 Locked1 = False #for locked buttons and/or moves for character 1 (especially in battles)
 Locked2 = False #for locked buttons and/or moves for character 2 (especially in battles)
 battle_ON = False #if a battle is in progress
-battle_e1_s2 = False
+battle_e1_s2 = False #to see which battle is currently on
 battle_e1_s4 = False
 battle_e1_s5 = False
 battle_e2_s1 = False
-Episode1_completed = False
+Episode1_completed = False #to see which episodes are completed
 Episode2_completed = False
 Episode3_completed = False
 Episode4_completed = False
 Game_completed = False
-CH1 = '' #for restarting battles, we save the battle function call parameters in global variables
+CH1 = '' #for restarting battles, we save the battle function call parameters in variables we will make global
 CH2 = ''
 BACKGROUND = ''
 ZE_BATTLE = ''
@@ -77,21 +77,22 @@ NightmareBattle = 'Nightmare_Battle.wav'
 NightmareDying = 'Nightmare_HeartbeatDying.wav'
 NightmareDeath = 'NightmareDeath.wav'
 NightmareScream = 'NightmareScream.wav'
+pikachu = 'A_theme_for_episode_2.wav'
 
 #background images and character images
-dreamspace = pygame.image.load("dreamspace.png")  # Scene 1 background
+dreamspace = pygame.image.load("dreamspace.png")  # Episode 1 Scene 1 background
 dreamspace = pygame.transform.scale(dreamspace, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
-school = pygame.image.load("school.png")  # Scene 2 background
+school = pygame.image.load("school.png")  # Episode 1 Scene 2 background
 school = pygame.transform.scale(school, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
-library = pygame.image.load('Library.png') #Scene 3 background
+library = pygame.image.load('Library.png') # Episode 1 Scene 3 background
 library = pygame.transform.scale(library, (SCREEN_WIDTH,SCREEN_HEIGHT))
 
-hill = pygame.image.load('hill.png') #Scene 4 background
+hill = pygame.image.load('hill.png') # Episode 1 Scene 4 background
 hill = pygame.transform.scale(hill,(SCREEN_WIDTH,SCREEN_HEIGHT))
 
-house = pygame.image.load('House.png') #Scene 5 background
+house = pygame.image.load('House.png') # Episode 1 Scene 5 background
 house = pygame.transform.scale(house,(SCREEN_WIDTH,SCREEN_HEIGHT))
 
 #Character Images: first load them, then scale them
@@ -436,7 +437,7 @@ class Character:
                 else:
                     pygame.draw.rect(screen, health_bar_red, (x+80, y+80, 5*self.og_health, 10))
                     pygame.draw.rect(screen, health_bar_green, (x+80, y+80, 50 - (5 * (10 - self.health)), 10))
-                #energy bar
+                #also draw energy bar if playable character
                 if self == CH1:
                     pygame.draw.rect(screen, health_bar_red, (x+80, y+20, 5*self.og_energy, 10))
                     pygame.draw.rect(screen, BLUE, (x+80, y+20, 50 - (5 * (10 - self.energy)), 10))
@@ -464,12 +465,12 @@ class Move:
 ExceedraMainAttack = Move('Dragon Fist of Fury',30,'ATTACK',0,10)
 ExceedraGuard = Move('Tail Block',0,'GUARD',0,3)
 ExceedraRecover = Move('Dragon Spirit',0,'RECOVER',15,0)
-HydranoidAttack = Move('Sword Slash',10,'ATTACK',0,5) #I know his sprite doesn't have a sword, but Canonically... he's got a sword
+HydranoidAttack = Move('Sword Slash',10,'ATTACK',0,5) #I know his sprite doesn't have a sword, but canonically... he uses a sword
 ClassicGuard = Move('Block',0,'GUARD',0,2)
 ClassicRecover = Move('Heal',0,'RECOVER',10,0)
-AkobosAttack = Move('Scythe of Demise',25,'ATTACK',0,10)
+AkobosAttack = Move('Scythe of Demise',25,'ATTACK',0,10) #His sprite has a trident, but canonically he can summon a scythe for battle
 AkobosRecover = Move('Demon Blood',0,'RECOVER',15,0)
-NightmareAttack = Move('Mental Plague',20,'ATTACK',0,20)
+NightmareAttack = Move('Mental Plague',30,'ATTACK',0,20)
 NightmareGuard = Move('Dream Trapped',0,'GUARD',0,10)
 NightmareRecover = Move('Dream Eater',0,'RECOVER',20,0)
 NullMove = Move('Play Dead',0,None,0,0) #nothing, just for characters who aren't in battles
@@ -480,7 +481,7 @@ OverlordAttack = Move('Dark En',50,'ATTACK',0,30) #overlord battle is in episode
 OverlordGuard = Move('Black Shield',0,'GUARD',0,5)
 OverlordRecover = Move('Shadow Bath',0,'RECOVER',25,0)
 
-#characters
+#characters (NPC opponents are "overloaded" on energy to avoid their moves getting locked, though canonically they have around the same energy as ExceedraMain)
 ExceedraMain = Character('Exceedra',100,50,20,ExceedraMainAttack,ExceedraGuard,ExceedraRecover,battle_pic=Exceedra1_pic)
 Hydranoid = Character('Hydranoid',70,1000,12,HydranoidAttack,ClassicGuard,ClassicRecover,battle_pic=Hydranoid_pic)
 Akobos = Character('Akobos',100,1000,19,AkobosAttack,ClassicGuard,AkobosRecover,battle_pic=Akobos_pic)
