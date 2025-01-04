@@ -40,8 +40,8 @@ pause = False
 scene = "start_menu"  # Start with the menu/title screen
 dialogue_index = 0
 running = True
-Locked1 = False #for locked buttons and/or moves for character 1 (especially in battles)
-Locked2 = False #for locked buttons and/or moves for character 2 (especially in battles)
+Locked1 = False #for locked buttons and/or moves for character 1 (in battles)
+Locked2 = False #for locked buttons and/or moves for character 2 (in battles)
 battle_ON = False #if a battle is in progress
 battle_e1_s2 = False #to see which battle is currently on
 battle_e1_s4 = False
@@ -52,7 +52,7 @@ Episode2_completed = False
 Episode3_completed = False
 Episode4_completed = False
 Game_completed = False
-CH1 = '' #for restarting battles, we save the battle function call parameters in variables we will make global
+CH1 = '' #for restarting battles, we save the battle function call parameters in variables and call them as global in functions
 CH2 = ''
 BACKGROUND = ''
 ZE_BATTLE = ''
@@ -77,7 +77,8 @@ NightmareBattle = 'Nightmare_Battle.wav'
 NightmareDying = 'Nightmare_HeartbeatDying.wav'
 NightmareDeath = 'NightmareDeath.wav'
 NightmareScream = 'NightmareScream.wav'
-pikachu = 'A_theme_for_episode_2.wav'
+aProblem = 'A_theme_for_episode_2.wav' #I thought I would use this in episode 2, but I thought this would fit better for the mood at the start of episode 3
+#other themes
 
 #background images and character images
 dreamspace = pygame.image.load("dreamspace.png")  # Episode 1 Scene 1 background
@@ -599,7 +600,7 @@ def make_button(text,font,text_size,text_color,x,y,button_width,button_height,bu
     Type is for me, to see if it's a menu or battle button
     '''
     #all possible things with the button (when clicking)
-    global scene, dialogue_index, Locked, CH1, CH2, BACKGROUND, ZE_BATTLE, MUSIC #lots of global variables to consider
+    global scene, dialogue_index, CH1, CH2, BACKGROUND, ZE_BATTLE, MUSIC #lots of global variables to consider
     
     #collision detection with the mouse (unfortunately we gotta redefine the mouse in here too)
     rect = pygame.Rect(x,y,button_width,button_height)
@@ -662,10 +663,6 @@ def Menu():
     
 #the 5 battle-system functions
 #game over (if you lose your battle)
-# CH1 = ExceedraMain #I'm defining these 4 ahead of time to test the try_again function
-# CH2 = Hydranoid
-# BACKGROUND = school
-# ZE_BATTLE = 'battle_e1_s2'
 def try_again(character1,character2,background,battle_name,music):
     '''tell the user to try again after losing a battle'''
     #lost the battle sound    
@@ -793,11 +790,6 @@ def Battle(character1,character2,background,battle_name,music):
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
-                # if event.key == pygame.K_1: #cheat out (debugging purposes)
-                #     battle_ON, battle_e1_s2, battle_e1_s4, battle_e1_s5, battle_e2_s1, scene = False, False, False, False, False, 'scene_5'
-                #     pygame.mixer.music.stop()
-                #     dialogue_index += 1
-                #     pygame.display.flip()
                 if event.key == pygame.K_p:
                     pause = True
                     pause_the_game()
@@ -867,43 +859,7 @@ def Battle(character1,character2,background,battle_name,music):
                 dialogue_index += 1
         
         pygame.display.flip()
-            
-# def Battle(character1,character2,background,battle_name): #-------- for early debugging/testing in development
-#     '''function for battles
-#     character1 is playable character (usually Exceedra)
-#     character2 is npc opponent
-#     background is... the background
-#     battle_name is to keep track of what battle is going on
-#     '''
-#     global Locked1, Locked2, dialogue_index, battle_ON, battle_e1_s2, battle_e1_s4, battle_e1_s5, CH1, CH2, BACKGROUND, ZE_BATTLE, pause, scene
-#     #save the parameters in the global variables so we can use them in external functions (functions not directly connected to this one) requiring them
-#     CH1 = character1
-#     CH2 = character2
-#     BACKGROUND = background
-#     ZE_BATTLE = battle_name
-    
-#     #during the battle
-#     while battle_ON:
-#         screen.blit(background,(0,0))
-#         if battle_name == 'battle_e1_s2':
-#             character1.BattlePosition(0, SCREEN_HEIGHT-500) #exceedra
-#             character2.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-650) #hydranoid
-#         for event in pygame.event.get():
-#             if event.type == pygame.KEYDOWN:
-#                 if event.key == pygame.K_1:
-#                     battle_ON, battle_e1_s2, scene = False, False, 'scene_2'
-#                     dialogue_index += 1
-#                     pygame.display.flip()
-#                 if event.key == pygame.K_0:
-#                     pygame.quit()
-#                     sys.exit()
-#                 if event.key == pygame.K_p:
-#                     pause = True
-#                     pause_the_game()
-#         make_button(character1.GuardMove.name,'Corbel',15,white,250,600,100,70,green,pale_green,'battle',Guard)
-#         pygame.display.flip()
-                
-                    
+
 #credits, when all episodes are beaten
 def Credits():
     '''
