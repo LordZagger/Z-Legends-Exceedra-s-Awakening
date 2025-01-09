@@ -543,10 +543,10 @@ def pause_the_game():
                 pygame.quit()
                 sys.exit()
             
-            if event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_u:
                     unpause()
-                if event.key == pygame.K_0:
+                elif event.key == pygame.K_0:
                     pygame.quit()
                     sys.exit()
                     
@@ -590,6 +590,15 @@ def draw_hint_text():
     hint_y = SCREEN_HEIGHT - 20  # Above the bottom of the box
     screen.blit(hint_surface, (hint_x, hint_y))
 
+#ultimately, they make...
+def dialogueBox(scene_list):
+    '''combines above 3 functions to make the dialogue for story scenes'''
+    global dialogue_index, DIALOGUE_FONT, SCREEN_HEIGHT
+    draw_text_box()
+    if dialogue_index < len(scene_list):
+        draw_text(screen, scene_list[dialogue_index], DIALOGUE_FONT, 20, SCREEN_HEIGHT - 110)
+    draw_hint_text()
+
 #in-game BUTTONS! (not the ones you button your shirt with)
 def make_button(text,font,text_size,text_color,x,y,button_width,button_height,button_color,highlight_color,Type,action):
     '''as per the name, function to make buttons. shows text made with make_text at text_color, 
@@ -616,20 +625,20 @@ def make_button(text,font,text_size,text_color,x,y,button_width,button_height,bu
             dialogue_index = 0
             if action == 'scene_1':
                 playMusic(Dreamspace_theme,'music',Forever=True)
-        if scene in ['battle_e1_s2','battle_e1_s4','battle_e1_s5','battle_e2_s1']:
+        elif scene in ['battle_e1_s2','battle_e1_s4','battle_e1_s5','battle_e2_s1']:
             if action == 'quit': #to quit the game after losing a battle
                 pygame.quit()
                 sys.exit()
-            if action == Battle: #to restart the battle after losing, with the saved parameters
+            elif action == Battle: #to restart the battle after losing, with the saved parameters
                 #reset characters' stats
                 CH1 = CH1.reset()
                 CH2 = CH2.reset()
                 #start the battle
                 playMusic(MUSIC,'music',Forever=True)
                 action(CH1, CH2, BACKGROUND, ZE_BATTLE, MUSIC)
-            if action == None:
+            elif action == None:
                 print("Nuh-Uh! Use your own moves (or Recover if that's the situation you're in!)") #aka do nothing; no worries, this won't cause a turn to go by, since the opponent also won't do anything (he only does things when Attack, Guard or Recover)
-            if action in [Attack,Guard,Recover]: #the battle moves
+            elif action in [Attack,Guard,Recover]: #the battle moves
                 action(CH1,CH2)
 
     if current_collision:
@@ -708,11 +717,12 @@ def Attack(character1,character2):
         if potential1 >= potential2:
             character2.losePower(character1.AttackMove.damage,0)
             character1.losePower(0,character1.AttackMove.energy_consumption)
+            print(character1.name,'did ATTACK;',character2.name,'did',opponent_move.specialty,'but',character1.name,'landed damage!') #description of the turn
         else:
             character1.losePower(character2.AttackMove.damage,0)
             character2.losePower(0,character2.AttackMove.energy_consumption)
+            print(character1.name,'did ATTACK;',character2.name,'did',opponent_move.specialty,', but',character2.name,'landed damage!') #description of the turn
         
-    print(character1.name,'did ATTACK;',character2.name,'did',opponent_move.specialty) #description of the turn
 
 def Guard(character1,character2):
     '''guard scenarios'''
@@ -793,7 +803,7 @@ def Battle(character1,character2,background,battle_name,music):
                 if event.key == pygame.K_p:
                     pause = True
                     pause_the_game()
-                if event.key == pygame.K_0:
+                elif event.key == pygame.K_0:
                     pygame.quit()
                     sys.exit()
                 
@@ -847,7 +857,7 @@ def Battle(character1,character2,background,battle_name,music):
                 try_again(character1,character2,background,battle_name,music)
             
             #winning
-            if character1.health > 0 and character2.health <= 0:
+            elif character1.health > 0 and character2.health <= 0:
                 pygame.mixer.music.stop()
                 playMusic(BattleWon,'sound')
                 if battle_name == 'battle_e1_s2':
@@ -902,23 +912,23 @@ while running:
                         if dialogue_index == 38:
                             pygame.mixer.music.stop()
                             playMusic(ExceedraLonelyTheme1,'music',Forever=True)
-                        if dialogue_index >= len(scene_1_dialogue):
+                        elif dialogue_index >= len(scene_1_dialogue):
                             pygame.mixer.music.stop()
                             scene = "scene_2"
                             dialogue_index = -1
                             playMusic(Hydranoid_DestinyTheme,'music',Forever=True)
                             
-                    if scene == "scene_2" and dialogue_index != 22:
+                    elif scene == "scene_2" and dialogue_index != 22:
                         dialogue_index += 1
                         playMusic(press_button_sound,'sound')
                         if dialogue_index == 22:
                             pygame.mixer.music.stop()
                             battle_ON, battle_e1_s2, scene = True, True, 'battle_e1_s2'  # Trigger battle and get out of dialogue
                             playMusic(BattleTheme1,'music',Forever=True)
-                        if dialogue_index == 33:
+                        elif dialogue_index == 33:
                             pygame.mixer.music.stop()
                             playMusic(ExceedraLonelyTheme2,'music',Forever=True)
-                        if dialogue_index >= len(scene_2_dialogue):
+                        elif dialogue_index >= len(scene_2_dialogue):
                             pygame.mixer.music.stop()
                             ExceedraMain = ExceedraMain.reset()
                             Hydranoid = Hydranoid.reset()
@@ -926,77 +936,77 @@ while running:
                             dialogue_index = -1
                             playMusic(LibraryTheme,'music',Forever=True)
                             
-                    if scene == "scene_3" and dialogue_index < len(scene_3_dialogue):
+                    elif scene == "scene_3" and dialogue_index < len(scene_3_dialogue):
                         dialogue_index += 1 
                         playMusic(press_button_sound,'sound')
                         if dialogue_index == 16:
                             pygame.mixer.music.stop()
                             playMusic(ExceedraAngryTheme,'music')
-                        if dialogue_index == 25:
+                        elif dialogue_index == 25:
                             pygame.mixer.music.stop()
                             playMusic(ExceedraAngryTheme,'music')
-                        if dialogue_index >= len(scene_3_dialogue):
+                        elif dialogue_index >= len(scene_3_dialogue):
                             pygame.mixer.music.stop()
                             scene = "scene_4"
                             dialogue_index = -1
                             
-                    if scene == "scene_4" and dialogue_index != 18:
+                    elif scene == "scene_4" and dialogue_index != 18:
                         dialogue_index += 1
                         playMusic(press_button_sound,'sound')
                         if dialogue_index == 5:
                             pygame.mixer.music.stop()
                             playMusic(AkobosAppears,'music',Forever=True)
-                        if dialogue_index == 18:
+                        elif dialogue_index == 18:
                             pygame.mixer.music.stop()
                             battle_ON, battle_e1_s4, scene = True, True, 'battle_e1_s4'  # Trigger battle and get out of dialogue
                             playMusic(AkobosBattle,'music',Forever=True)
-                        if dialogue_index >= len(scene_4_dialogue):
+                        elif dialogue_index >= len(scene_4_dialogue):
                             pygame.mixer.music.stop()
                             ExceedraMain = ExceedraMain.reset()
                             Akobos = Akobos.reset()
                             scene = "scene_5"
                             dialogue_index = -1
                             
-                    if scene == "scene_5" and dialogue_index != 37:
+                    elif scene == "scene_5" and dialogue_index != 37:
                         dialogue_index += 1
                         playMusic(press_button_sound,'sound')
                         if dialogue_index == 32:
                             pygame.mixer.music.stop()
                             playMusic(NightmareAppears,'music',Forever=True)
-                        if dialogue_index == 37:
+                        elif dialogue_index == 37:
                             pygame.mixer.music.stop()
                             playMusic(NightmareScream,'sound')
                             battle_ON, battle_e1_s5, scene = True, True, 'battle_e1_s5'  # Trigger battle and get out of dialogue
                             playMusic(NightmareBattle,'music',Forever=True)
-                        if dialogue_index == 41:
+                        elif dialogue_index == 41:
                             pygame.mixer.music.stop()
                             playMusic(NightmareDying,'music',Forever=True)
-                        if dialogue_index == 48:
+                        elif dialogue_index == 48:
                             pygame.mixer.music.stop()
                             playMusic(NightmareDeath,'sound')
                             ExceedraMain = ExceedraMain.reset()
                             Nightmare = Nightmare.reset()
-                        if dialogue_index >= len(scene_5_dialogue):
+                        elif dialogue_index >= len(scene_5_dialogue):
                             pygame.mixer.music.stop()
                             Episode1_completed = True
                             scene = "start_menu"
                             dialogue_index = -1
                     
-                    if scene == 'scene_6': #{TO UPDATE}
+                    elif scene == 'scene_6': #{TO UPDATE}
                         #dialogue_index += 1
                         playMusic(press_button_sound,'sound')
                             
-                if event.key == pygame.K_BACKSPACE:  # On Backspace key
+                elif event.key == pygame.K_BACKSPACE:  # On Backspace key
                     if dialogue_index > 0:
                         playMusic(press_button_sound,'sound')
                         dialogue_index -= 1  # Go to previous line
                     else:
                         dialogue_index = 0  # Keep at the first line
             #pause or exit during story scenes (these 2 don't work during battles (though they should), which is why we have the whole pygame.event.get() also in the battle function)           
-            if event.key == pygame.K_p:
+            elif event.key == pygame.K_p:
                 pause = True
                 pause_the_game()
-            if event.key == pygame.K_0:
+            elif event.key == pygame.K_0:
                 pygame.quit() #press 0 to quit
                 sys.exit()
     
@@ -1005,111 +1015,79 @@ while running:
         Menu()
         
     #episode 1, scene 1
-    if scene == 'scene_1':
+    elif scene == 'scene_1':
         screen.blit(dreamspace, (0, 0))
         ExceedraMain.BattlePosition(100, 200)
         Overlord.BattlePosition(700,150)
-        draw_text_box()
-        if dialogue_index < len(scene_1_dialogue):
-            draw_text(screen, scene_1_dialogue[dialogue_index], DIALOGUE_FONT, 20, SCREEN_HEIGHT - 110)
-        draw_hint_text()  # Display hint
+        dialogueBox(scene_1_dialogue)
         
     #episode 1, scene 2
-    if scene == 'scene_2':
+    elif scene == 'scene_2':
         screen.blit(school, (0, 0))
         ExceedraMain.BattlePosition(100, 200)
         Destiny.BattlePosition(300,200)
         Hydranoid.BattlePosition(400,100)
-        draw_text_box()
-        if dialogue_index < len(scene_2_dialogue):
-            draw_text(screen, scene_2_dialogue[dialogue_index], DIALOGUE_FONT, 20, SCREEN_HEIGHT - 110)
-        draw_hint_text()  # Display hint
+        dialogueBox(scene_2_dialogue)
     
     #battle in episode 1, scene 2: Exceedra VS Hydranoid
-    if scene == 'battle_e1_s2':
+    elif scene == 'battle_e1_s2':
         Battle(ExceedraMain,Hydranoid,school,'battle_e1_s2',BattleTheme1)
             
     #episode 1, scene 3
-    if scene == "scene_3":
+    elif scene == "scene_3":
         screen.blit(library, (0, 0))
         ExceedraMain.BattlePosition(100, 200)
         Finlay.BattlePosition(200,200)
         Grace.BattlePosition(300,200)
         Ken.BattlePosition(400,200)
-        draw_text_box()
-        if dialogue_index < len(scene_3_dialogue):
-            draw_text(screen, scene_3_dialogue[dialogue_index], DIALOGUE_FONT, 20, SCREEN_HEIGHT - 110)
-        draw_hint_text()  # Display hint
+        dialogueBox(scene_3_dialogue)
         if dialogue_index >= 22:
             screen.blit(school, (0, 0))
             ExceedraMain.BattlePosition(100, 200)
             Hydranoid.BattlePosition(20,100)
-            draw_text_box()
-            if dialogue_index < len(scene_3_dialogue):
-                draw_text(screen, scene_3_dialogue[dialogue_index], DIALOGUE_FONT, 20, SCREEN_HEIGHT - 110)
-            draw_hint_text()  # Display hint
+            dialogueBox(scene_3_dialogue)
     
     #episode 1, scene 4
-    if scene == "scene_4":
+    elif scene == "scene_4":
         screen.blit(hill, (0, 0))
         ExceedraMain.BattlePosition(100, 200)
-        draw_text_box()
-        if dialogue_index < len(scene_4_dialogue):
-            draw_text(screen, scene_4_dialogue[dialogue_index], DIALOGUE_FONT, 20, SCREEN_HEIGHT - 110)
-        draw_hint_text()  # Display hint
+        dialogueBox(scene_4_dialogue)
         if 5 <= dialogue_index < 10:
             screen.blit(hill, (0, 0))
             ExceedraMain.BattlePosition(100, 200)
             Akobos.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-500)
-            draw_text_box()
-            if dialogue_index < len(scene_4_dialogue):
-                draw_text(screen, scene_4_dialogue[dialogue_index], DIALOGUE_FONT, 20, SCREEN_HEIGHT - 110)
-            draw_hint_text()  # Display hint
+            dialogueBox(scene_4_dialogue)
+
         if dialogue_index >= 10 and dialogue_index != 18:
             screen.blit(hill, (0, 0))
             ExceedraMain.BattlePosition(100, 200)
             Hydranoid.BattlePosition(20,100)
             Akobos.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-500)
-            draw_text_box()
-            if dialogue_index < len(scene_4_dialogue):
-                draw_text(screen, scene_4_dialogue[dialogue_index], DIALOGUE_FONT, 20, SCREEN_HEIGHT - 110)
-            draw_hint_text()  # Display hint
+            dialogueBox(scene_4_dialogue)
     
     #battle in episode 1, scene 4: Exceedra VS Akobos
-    if scene == 'battle_e1_s4':
+    elif scene == 'battle_e1_s4':
         Battle(ExceedraMain,Akobos,hill,'battle_e1_s4',AkobosBattle)
     
     #episode 1, scene 5
-    if scene == "scene_5":
+    elif scene == "scene_5":
         screen.blit(house, (0, 0))
         ExceedraMain.BattlePosition(100, 200)
         Junia.BattlePosition(500,50)
-        draw_text_box()
-        if dialogue_index < len(scene_5_dialogue):
-            draw_text(screen, scene_5_dialogue[dialogue_index], DIALOGUE_FONT, 20, SCREEN_HEIGHT - 110)
-        draw_hint_text()  # Display hint
+        dialogueBox(scene_5_dialogue)
         if 24 <= dialogue_index < 31 or dialogue_index >= 48:
             screen.blit(house, (0, 0))
             ExceedraMain.BattlePosition(100, 200)
-            draw_text_box()
-            if dialogue_index < len(scene_5_dialogue):
-                draw_text(screen, scene_5_dialogue[dialogue_index], DIALOGUE_FONT, 20, SCREEN_HEIGHT - 110)
-            draw_hint_text()  # Display hint
-        if 31 <= dialogue_index < 36:
+            dialogueBox(scene_5_dialogue)
+        elif 31 <= dialogue_index < 36:
             screen.blit(dreamspace, (0, 0))
             ExceedraMain.BattlePosition(0, SCREEN_HEIGHT-500)
-            draw_text_box()
-            if dialogue_index < len(scene_5_dialogue):
-                draw_text(screen, scene_5_dialogue[dialogue_index], DIALOGUE_FONT, 20, SCREEN_HEIGHT - 110)
-            draw_hint_text()
-        if 36 <= dialogue_index < 48 and dialogue_index != 37:
+            dialogueBox(scene_5_dialogue)
+        elif 36 <= dialogue_index < 48 and dialogue_index != 37:
             screen.blit(dreamspace, (0, 0))
             ExceedraMain.BattlePosition(0, SCREEN_HEIGHT-500)
             Nightmare.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-500)
-            draw_text_box()
-            if dialogue_index < len(scene_5_dialogue):
-                draw_text(screen, scene_5_dialogue[dialogue_index], DIALOGUE_FONT, 20, SCREEN_HEIGHT - 110)
-            draw_hint_text()
+            dialogueBox(scene_5_dialogue)
     
     #battle in episode 1, scene 5: Exceedra VS Nightmare
     if scene == 'battle_e1_s5':
