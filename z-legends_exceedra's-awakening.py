@@ -803,7 +803,7 @@ def Battle(character1,character2,background,battle_name,music):
                 if event.key == pygame.K_p:
                     pause = True
                     pause_the_game()
-                elif event.key == pygame.K_0:
+                if event.key == pygame.K_0:
                     pygame.quit()
                     sys.exit()
                 
@@ -996,17 +996,17 @@ while running:
                         #dialogue_index += 1
                         playMusic(press_button_sound,'sound')
                             
-                elif event.key == pygame.K_BACKSPACE:  # On Backspace key
+                if event.key == pygame.K_BACKSPACE:  # On Backspace key
                     if dialogue_index > 0:
                         playMusic(press_button_sound,'sound')
                         dialogue_index -= 1  # Go to previous line
                     else:
                         dialogue_index = 0  # Keep at the first line
             #pause or exit during story scenes (these 2 don't work during battles (though they should), which is why we have the whole pygame.event.get() also in the battle function)           
-            elif event.key == pygame.K_p:
+            if event.key == pygame.K_p:
                 pause = True
                 pause_the_game()
-            elif event.key == pygame.K_0:
+            if event.key == pygame.K_0:
                 pygame.quit() #press 0 to quit
                 sys.exit()
     
