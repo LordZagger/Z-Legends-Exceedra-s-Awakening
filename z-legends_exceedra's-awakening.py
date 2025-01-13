@@ -1090,19 +1090,19 @@ while running:
             dialogueBox(scene_5_dialogue)
     
     #battle in episode 1, scene 5: Exceedra VS Nightmare
-    if scene == 'battle_e1_s5':
+    elif scene == 'battle_e1_s5':
         Battle(ExceedraMain,Nightmare,dreamspace,'battle_e1_s5',NightmareBattle)
             
     #episode 2, scene 1 (aka scene 6)
-    if scene == 'scene_6':
+    elif scene == 'scene_6':
         screen.fill(BLUE)
         make_text('EPISODE 2 WILL BE READY SOON! :)',"comicsansms",65,white,SCREEN_WIDTH/2,SCREEN_HEIGHT/2)
     
-    if scene == 'battle_e2_s1': #{TO UPDATE}
+    elif scene == 'battle_e2_s1': #{TO UPDATE}
         pass
     
     #credits when the game is completed (after Game_completed is made True)
-    if scene == 'credits':
+    elif scene == 'credits':
         Finished = True
         Credits()
             
