@@ -462,7 +462,7 @@ class Move:
        self.recovery = recovery
        self.energy_consumption = energy_consumption
 
-#moves    
+#moves    {TO UPDATE}
 ExceedraMainAttack = Move('Dragon Fist of Fury',30,'ATTACK',0,10)
 ExceedraGuard = Move('Tail Block',0,'GUARD',0,3)
 ExceedraRecover = Move('Dragon Spirit',0,'RECOVER',15,0)
@@ -481,8 +481,14 @@ DestinyRecover = Move('Centered',0,'RECOVER',10,0)
 OverlordAttack = Move('Dark En',50,'ATTACK',0,30) #overlord battle is in episode 2
 OverlordGuard = Move('Black Shield',0,'GUARD',0,5)
 OverlordRecover = Move('Shadow Bath',0,'RECOVER',25,0)
+ExceedraDarkAttack = Move('Dark Lightning',40,'ATTACK',0,15) #angry exceedra who uses his dark powers (episode 2)
+ExceedraDarkRecover = Move('Spirit of Vengeance',0,'RECOVER',20,0)
+KyraAttack = Move('Surprise Attack',30,'ATTACK',0,10)
+KyraGuard = Move('Teleport',0,'GUARD',0,5)
+KyraRecover = Move('Psychopower',0,'RECOVER',20,0)
 
 #characters (NPC opponents are "overloaded" on energy to avoid their moves getting locked, though canonically they have around the same energy as ExceedraMain)
+#{TO UPDATE}
 ExceedraMain = Character('Exceedra',100,50,20,ExceedraMainAttack,ExceedraGuard,ExceedraRecover,battle_pic=Exceedra1_pic)
 Hydranoid = Character('Hydranoid',70,1000,12,HydranoidAttack,ClassicGuard,ClassicRecover,battle_pic=Hydranoid_pic)
 Akobos = Character('Akobos',100,1000,19,AkobosAttack,ClassicGuard,AkobosRecover,battle_pic=Akobos_pic)
@@ -493,6 +499,8 @@ Finlay = Character('Finlay',0,0,0,NullMove,NullMove,NullMove,battle_pic=Finlay_p
 Ken = Character('Ken',0,0,0,NullMove,NullMove,NullMove,battle_pic=Ken_pic)
 Junia = Character('Junia',0,0,0,NullMove,NullMove,NullMove,battle_pic=Junia_pic)
 Overlord = Character('Overlord',200,1500,30,OverlordAttack,OverlordGuard,OverlordRecover,battle_pic=Overlord_pic)
+ExceedraDark = Character('Exceedra',150,75,25,ExceedraDarkAttack,ExceedraGuard,ExceedraDarkRecover,battle_pic=Exceedra1_pic)
+Kyra = Character('Kyra',150,75,23,KyraAttack,KyraGuard,KyraRecover) #companion character in Episode 3
 
 #main functions used by the game (the main while loop)
 #plays music and sound
@@ -604,8 +612,7 @@ def make_button(text,font,text_size,text_color,x,y,button_width,button_height,bu
     '''as per the name, function to make buttons. shows text made with make_text at text_color, 
     button_color is the button's color and whenever the cursor is on the button, 
     its colors turns to highlight_color if the button is associated to a function, 
-    the function call is placed at action can_cancel_move is for buttons connected to moves in battles, 
-    helps lock or unlock a button to respectively prevent or allow the use of a move, default is false (for menu buttons)
+    the function call is placed at action; None is for the opponent's move in battle, 'Nope' is to tell you to use recover when you're out of energy 
     Type is for me, to see if it's a menu or battle button
     '''
     #all possible things with the button (when clicking)
@@ -634,10 +641,13 @@ def make_button(text,font,text_size,text_color,x,y,button_width,button_height,bu
                 CH1 = CH1.reset()
                 CH2 = CH2.reset()
                 #start the battle
+                pygame.mixer.music.stop()
                 playMusic(MUSIC,'music',Forever=True)
                 action(CH1, CH2, BACKGROUND, ZE_BATTLE, MUSIC)
             elif action == None:
-                print("Nuh-Uh! Use your own moves (or Recover if that's the situation you're in!)") #aka do nothing; no worries, this won't cause a turn to go by, since the opponent also won't do anything (he only does things when Attack, Guard or Recover)
+                print("Nuh-Uh! Use your own moves!")
+            elif action == 'Nope':
+                print('Use Recover!') #aka do nothing; no worries, this won't cause a turn to go by, since the opponent also won't do anything (he only does things when Attack, Guard or Recover)
             elif action in [Attack,Guard,Recover]: #the battle moves
                 action(CH1,CH2)
 
@@ -691,10 +701,12 @@ def Attack(character1,character2):
     if opponent_move == character2.GuardMove: #if opponent guards and you attack, no damage
         character2.losePower(0,character2.GuardMove.energy_consumption)
         character1.losePower(0,character1.AttackMove.energy_consumption)
+        print(character1.name,'did ATTACK;',character2.name,'did',opponent_move.specialty) #description of the turn
         
     elif opponent_move == character2.RecoverMove: #if opponent recovers and you attack, damage for the opponent
         character2.losePower(character1.AttackMove.damage,0)
         character1.losePower(0,character1.AttackMove.energy_consumption)
+        print(character1.name,'did ATTACK;',character2.name,'did',opponent_move.specialty) #description of the turn
         
     elif opponent_move == character2.AttackMove: #if both of you attack
         #prompt for special event to determine which move lands
@@ -739,9 +751,9 @@ def Guard(character1,character2):
         character1.losePower(0,character1.GuardMove.energy_consumption)
         character2.Recover(character2.RecoverMove.recovery)
         #if the opponent recovers up to max stats
-        if character2.health >= character2.og_health:
+        if character2.health > character2.og_health:
             character2.health = character2.og_health
-        if character2.energy >= character2.og_energy:
+        if character2.energy > character2.og_energy:
             character2.energy = character2.og_energy 
             
     print(character1.name,'did GUARD;',character2.name,'did',opponent_move.specialty) #description of the turn
@@ -758,9 +770,9 @@ def Recover(character1,character2):
         character1.Recover(character1.RecoverMove.recovery)
         character2.Recover(character2.RecoverMove.recovery)
         #if the opponent recovers up to max stats
-        if character2.health >= character2.og_health:
+        if character2.health > character2.og_health:
             character2.health = character2.og_health
-        if character2.energy >= character2.og_energy:
+        if character2.energy > character2.og_energy:
             character2.energy = character2.og_energy 
         
     elif opponent_move == character2.AttackMove: #if the opponent attacks and you recover, you take damage
@@ -768,9 +780,9 @@ def Recover(character1,character2):
         character2.losePower(0,character2.AttackMove.energy_consumption)
     
     #if you recover up to your max stats:
-    if character1.health >= character1.og_health:
+    if character1.health > character1.og_health:
         character1.health = character1.og_health
-    if character1.energy >= character1.og_energy:
+    if character1.energy > character1.og_energy:
         character1.energy = character1.og_energy  
         
     print(character1.name,'did RECOVER;',character2.name,'did',opponent_move.specialty) #description of the turn
@@ -825,8 +837,8 @@ def Battle(character1,character2,background,battle_name,music):
                 Locked1 = False
             
             if Locked1 == True:
-                make_button(character1.AttackMove.name,'Corbel',15,white,100,600,100,70,black,black,'battle',None)
-                make_button(character1.GuardMove.name,'Corbel',15,white,250,600,100,70,black,black,'battle',None)
+                make_button(character1.AttackMove.name,'Corbel',15,white,100,600,100,70,black,black,'battle','Nope')
+                make_button(character1.GuardMove.name,'Corbel',15,white,250,600,100,70,black,black,'battle','Nope')
                 make_button(character1.RecoverMove.name,'Corbel',15,GREEN,400,600,100,70,yellow,pale_yellow,'battle',Recover)
                 make_text('USE RECOVER!',"comicsansms",100,RED,SCREEN_WIDTH/2,SCREEN_HEIGHT/2)
             else:
@@ -875,8 +887,8 @@ def Credits():
     '''
     the credits!!!
     '''
-    global scene, Finished
-    while Finished:
+    global scene, rollcall
+    while rollcall:
         #black background
         screen.fill(black)
         #the end (big)
@@ -887,7 +899,7 @@ def Credits():
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_1:
-                    Finished = False
+                    rollcall = False
                     scene = 'start_menu'
             
         pygame.display.flip()
@@ -1103,7 +1115,7 @@ while running:
     
     #credits when the game is completed (after Game_completed is made True)
     elif scene == 'credits':
-        Finished = True
+        rollcall = True
         Credits()
             
     #updates the display whenever needed
