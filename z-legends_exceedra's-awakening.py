@@ -38,8 +38,10 @@ pale_yellow = (158,161,8)
 # Game States (global variables for transitions and making the game run)
 pause = False
 scene = "start_menu"  # Start with the menu/title screen
+            #{TO UPDATE};#battle_e#,_s# is in the story; in boss rush, b1-3 episode 1, 4-7 episode 2, 8-11 episode 3. 12-15 final episode; in custom, the battle scene is 0
+list_of_battle_scenes = ['battle_e1_s2','battle_e1_s4','battle_e1_s5','battle_e2_s1','b1','b2','b3','b4','b5','b6','b7','b8','b9','b10','b11','b12','b13','b14','b15','0']
 dialogue_index = 0
-running = True
+choosing = False
 Locked1 = False #for locked buttons and/or moves for character 1 (in battles)
 Locked2 = False #for locked buttons and/or moves for character 2 (in battles)
 battle_ON = False #if a battle is in progress
@@ -51,12 +53,15 @@ Episode1_completed = False #to see which episodes are completed
 Episode2_completed = False
 Episode3_completed = False
 Episode4_completed = False
-Game_completed = False
-CH1 = '' #for restarting battles, we save the battle function call parameters in variables and call them as global in functions
+Game_completed = True
+#for restarting battles, we save the battle function call parameters in variables and call them as global in functions
+#for now, they're empty strings
+CH1 = '' 
 CH2 = ''
 BACKGROUND = ''
 ZE_BATTLE = ''
 MUSIC = ''
+score = 0 #for boss rush score (how many bosses you managed to beat); will be displayed on screen
 
 #Music and sounds
 press_button_sound = 'pokemon-a-button.wav'
@@ -78,9 +83,9 @@ NightmareDying = 'Nightmare_HeartbeatDying.wav'
 NightmareDeath = 'NightmareDeath.wav'
 NightmareScream = 'NightmareScream.wav'
 aProblem = 'A_theme_for_episode_2.wav' #I thought I would use this in episode 2, but I thought this would fit better for the mood at the start of episode 3
-#other themes
+#other themes {TO UPDATE}
 
-#background images and character images
+#background images and character images {TO UPDATE}
 dreamspace = pygame.image.load("dreamspace.png")  # Episode 1 Scene 1 background
 dreamspace = pygame.transform.scale(dreamspace, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
@@ -202,7 +207,7 @@ scene_2_dialogue = [
     "Destiny: Uh oh…",
     "[Exceedra, fully pissed, triggers a battle.]",
     "[BATTLE]",
-    "[Hydranoid is defeated. Stands up, scratching his head, smiling.]",
+    "[Hydranoid is defeated. Starts to stand up, scratching his head, smiling.]",
     "Hydranoid: You really are strong, Captain. No wonder you’re the Lagoon.",
     "Exceedra: Don’t piss me off like that again, little brother.",
     "Hydranoid: All right… [Exceedra offers his hand so Hydranoid can get up.]",
@@ -349,22 +354,28 @@ scene_5_dialogue = [
 #dialogue for Episode 2 (scenes 6-) {TO UPDATE}
 #scene 6
 scene_6_dialogue = [
-    
+    "[Hydranoid and Exceedra are in a hallway in school, discussing.]",
+    "Hydranoid: [affirmative] It was too easy. He escaped custody and was seen going into a power plant. He came out 3 minutes later holding an unidentifiable object.", 
+    "Exceedra: [serious] Any idea what it was?", 
+    "Hydranoid: I don’t know, but I guess we’ll find out soon…", 
+    "[A really big kaboom is heard and shakes the building.]", 
+    "Exceedra: [dark] That was too soon.", 
+    "[They head outside and are confronted with ///]"
 ]
 
 #classes for characters and moves
 class Character:
     '''
-    This class contains variables related to them for the battle system, such as health, recovery and energy and attack potential stats
-    Has variables for the name, stats and moves of a character.
+    This class is for creating the characters in the story
+    contains attributes related to them for the battle system, such as health, recovery and energy and attack potential stats
+    Also has attributes for the name and moves of a character.
     Health is the amount of HP (aka life/hit points) a character has. it's how they stay alive, until health is reduce to 0, at which point they die
-    Recovery is to determine the amount of energy and health a character will recover when using that move
-    Energy is the amount of energy a character has to use a move. it's a special stat that helps prevent spamming of a single attack, and so requires players to have a strategy
-    Attack potential is a special stat that helps determine which attack lands in a pinch
-    battle_pic is the character's png image (image name) for battles, optional argument (though 99.9% of the time it's not None)
+    Energy is the amount of energy a character has to use a move. it's a special stat that helps prevent spamming of a single attack, and so requires players to have somewhat of a strategy
+    Attack potential is a special stat that helps determine which attack lands in a pinch (see Attack function)
+    battle_pic is the character's png image (image name) for battles
     og stands for original, those attributes help reset the characters stats in the reset method
     '''
-    def __init__(self, name, health, energy, attack_potential, AttackMove, GuardMove, RecoverMove, battle_pic=None):
+    def __init__(self, name, health, energy, attack_potential, AttackMove, GuardMove, RecoverMove, battle_pic):
         '''
         initialize a character
         '''
@@ -379,20 +390,15 @@ class Character:
         self.battle_pic = battle_pic
         
         #original stats, to reset the character and as references during battles
-        self.og_name = name
         self.og_health = health
         self.og_energy = energy
-        self.og_attack_potential = attack_potential
-        self.og_AttackMove = AttackMove
-        self.og_GuardMove = GuardMove
-        self.og_RecoverMove = RecoverMove
-        self.og_battle_pic = battle_pic
-        
+        #put the 3 moves in a list for use in the randomMove method
         self.movepool = [AttackMove, GuardMove, RecoverMove]
-    
+        
     def reset(self):
         '''reset a character's stats by returning a character of the original stats'''
-        return Character(self.og_name,self.og_health,self.og_energy,self.og_attack_potential,self.og_AttackMove,self.og_GuardMove,self.og_RecoverMove,battle_pic=self.og_battle_pic)
+        self.health = self.og_health
+        self.energy = self.og_energy
     
     def losePower(self,health_amount,energy_amount):
         '''
@@ -411,13 +417,13 @@ class Character:
     
     def randomMove(self):
         '''
-        during a battle, the npc chooses a random move
+        during a battle, the npc chooses a random move from their movepool
         '''
         return choice(self.movepool)
     
     def BattlePosition(self,x,y):
         '''
-        placing a character and their health bar (if during a battle) on top of the background
+        placing a character, their energy bar and their health bar (if during a battle) on top of the background
         mainly used for positioning during battles, but this method's existence is also convenient for scenes
         '''
         #place the character
@@ -426,31 +432,42 @@ class Character:
                 screen.blit(self.battle_pic, (x,y))
 
         else:
-
-            #character health bar; we keep while health >= 0 because if it falls below that, there might be an error
-            #we hopefully manage to avoid the error, and let a later function correct the health value
+            #if the character hasn't yet been defeated
             if self.health >= 0:
-                screen.blit(self.battle_pic, (x,y))
-                
-                if self == Nightmare:
-                    pygame.draw.rect(screen, health_bar_red, (x-180, y+40, 5*self.og_health, 10))
-                    pygame.draw.rect(screen, health_bar_green, (x-180, y+40, 50 - (5 * (10 - self.health)), 10))
+                screen.blit(self.battle_pic, (x,y)) #place them
+                #health bar
+                if self == Nightmare or self == NightmareC:
+                    pygame.draw.rect(screen, health_bar_red, (x+80, y+40, 500, 10))
+                    pygame.draw.rect(screen, health_bar_green, (x+80, y+40, self.health/self.og_health*500, 10))
+                elif self == Hydranoid or self == HydranoidC:
+                    pygame.draw.rect(screen, health_bar_red, (x+80, y+230, 500, 10))
+                    pygame.draw.rect(screen, health_bar_green, (x+80, y+230, self.health/self.og_health*500, 10))
+                elif self == Overlord or self == OverlordC:
+                    pygame.draw.rect(screen, health_bar_red, (x+80, y+110, 500, 10))
+                    pygame.draw.rect(screen, health_bar_green, (x+80, y+110, self.health/self.og_health*500, 10))
                 else:
-                    pygame.draw.rect(screen, health_bar_red, (x+80, y+80, 5*self.og_health, 10))
-                    pygame.draw.rect(screen, health_bar_green, (x+80, y+80, 50 - (5 * (10 - self.health)), 10))
+                    pygame.draw.rect(screen, health_bar_red, (x+80, y+80, 500, 10))
+                    pygame.draw.rect(screen, health_bar_green, (x+80, y+80, self.health/self.og_health*500, 10))
+                
                 #also draw energy bar if playable character
-                if self == CH1:
-                    pygame.draw.rect(screen, health_bar_red, (x+80, y+20, 5*self.og_energy, 10))
-                    pygame.draw.rect(screen, BLUE, (x+80, y+20, 50 - (5 * (10 - self.energy)), 10))
+                if self == CH1 and CH1 == HydranoidC:
+                    pygame.draw.rect(screen, health_bar_red, (x+80, y+160, 500, 10))
+                    pygame.draw.rect(screen, BLUE, (x+80, y+160, self.energy/self.og_energy*500, 10))
+                elif self == CH1 and CH1 == OverlordC:
+                    pygame.draw.rect(screen, health_bar_red, (x+80, y+50, 500, 10))
+                    pygame.draw.rect(screen, BLUE, (x+80, y+50, self.energy/self.og_energy*500, 10))
+                elif self == CH1 and CH1 != HydranoidC:
+                    pygame.draw.rect(screen, health_bar_red, (x+80, y+20, 500, 10))
+                    pygame.draw.rect(screen, BLUE, (x+80, y+20, self.energy/self.og_energy*500, 10))
                 
 class Move:
     '''
     This class will serve to define all the moves similarly to how characters will be created.
-    Has variables for the name, energy consumption and/or damage caused, protection given and recovery made of the move
-    Damage is the amount of damage (health lost by opponent) made by the move
-    Specialty is the type of the move (attack, guard or recover) (I'm tired of using Type all the time), is used to identify and name the type of the move
-    recovery is how much energy and health are recovered
-    energy consumption is the amount of energy needed to use a move
+    Has attributes for the name, type, energy consumption and/or damage caused and recovery made of the move
+    Damage is the amount of damage (health lost by opponent) made by the move (for Attack Moves)
+    Specialty is the type of the move (attack, guard or recover) (I'm tired of using Type all the time), is mainly used to keep track of and print the type of the move
+    recovery is how much energy and health are recovered (for Recover moves)
+    energy consumption is the amount of energy needed to use a move (aka lost when move is used)
     '''
     def __init__(self, name, damage, specialty, recovery, energy_consumption):
        '''
@@ -487,22 +504,48 @@ KyraAttack = Move('Surprise Attack',30,'ATTACK',0,10)
 KyraGuard = Move('Teleport',0,'GUARD',0,5)
 KyraRecover = Move('Psychopower',0,'RECOVER',20,0)
 
-#characters (NPC opponents are "overloaded" on energy to avoid their moves getting locked, though canonically they have around the same energy as ExceedraMain)
+#characters (NPC opponents are "overloaded" on energy to avoid their moves getting locked, though canonically they have around the same energy as Exceedra or Dark Exceedra)
 #{TO UPDATE}
-ExceedraMain = Character('Exceedra',100,50,20,ExceedraMainAttack,ExceedraGuard,ExceedraRecover,battle_pic=Exceedra1_pic)
-Hydranoid = Character('Hydranoid',70,1000,12,HydranoidAttack,ClassicGuard,ClassicRecover,battle_pic=Hydranoid_pic)
-Akobos = Character('Akobos',100,1000,19,AkobosAttack,ClassicGuard,AkobosRecover,battle_pic=Akobos_pic)
-Nightmare = Character('Nightmare',150,1000,17,NightmareAttack,NightmareGuard,NightmareRecover,battle_pic=Nightmare_pic)
-Destiny = Character('Destiny',80,30,15,DestinyAttack,DestinyGuard,DestinyRecover,battle_pic=Destiny_pic)
-Grace = Character('Grace',0,0,0,NullMove,NullMove,NullMove,battle_pic=Grace_pic)
-Finlay = Character('Finlay',0,0,0,NullMove,NullMove,NullMove,battle_pic=Finlay_pic)
-Ken = Character('Ken',0,0,0,NullMove,NullMove,NullMove,battle_pic=Ken_pic)
-Junia = Character('Junia',0,0,0,NullMove,NullMove,NullMove,battle_pic=Junia_pic)
-Overlord = Character('Overlord',200,1500,30,OverlordAttack,OverlordGuard,OverlordRecover,battle_pic=Overlord_pic)
-ExceedraDark = Character('Exceedra',150,75,25,ExceedraDarkAttack,ExceedraGuard,ExceedraDarkRecover,battle_pic=Exceedra1_pic)
-Kyra = Character('Kyra',150,75,23,KyraAttack,KyraGuard,KyraRecover) #companion character in Episode 3
+ExceedraMain = Character('Exceedra',100,50,20,ExceedraMainAttack,ExceedraGuard,ExceedraRecover,Exceedra1_pic)
+Hydranoid = Character('Hydranoid',70,1000,12,HydranoidAttack,ClassicGuard,ClassicRecover,Hydranoid_pic)
+Akobos = Character('Akobos',100,1000,19,AkobosAttack,ClassicGuard,AkobosRecover,Akobos_pic)
+Nightmare = Character('Nightmare',150,1000,17,NightmareAttack,NightmareGuard,NightmareRecover,Nightmare_pic)
+Destiny = Character('Destiny',80,30,15,DestinyAttack,DestinyGuard,DestinyRecover,Destiny_pic)
+Grace = Character('Grace',0,0,0,NullMove,NullMove,NullMove,Grace_pic)
+Finlay = Character('Finlay',0,0,0,NullMove,NullMove,NullMove,Finlay_pic)
+Ken = Character('Ken',0,0,0,NullMove,NullMove,NullMove,Ken_pic)
+Junia = Character('Junia',0,0,0,NullMove,NullMove,NullMove,Junia_pic)
+Overlord = Character('Overlord',200,1500,30,OverlordAttack,OverlordGuard,OverlordRecover,Overlord_pic)
+ExceedraDark = Character('Dark Exceedra',150,75,25,ExceedraDarkAttack,ExceedraGuard,ExceedraDarkRecover,Exceedra1_pic)
+Kyra = Character('Kyra',150,75,23,KyraAttack,KyraGuard,KyraRecover,None) #companion character in Episodes 3/4, None pic for now
+NullPerson = Character('',1,1,1,NullMove,NullMove,NullMove,None) #nobody... blank area for character select in custom battle
+#canon characters for custom battle (C stands for canon, like I talked about above)
+OverlordC = Character('Overlord',200,100,30,OverlordAttack,OverlordGuard,OverlordRecover,Overlord_pic)
+HydranoidC = Character('Hydranoid',70,50,12,HydranoidAttack,ClassicGuard,ClassicRecover,Hydranoid_pic)
+AkobosC = Character('Akobos',100,50,19,AkobosAttack,ClassicGuard,AkobosRecover,Akobos_pic)
+NightmareC = Character('Nightmare',150,75,17,NightmareAttack,NightmareGuard,NightmareRecover,Nightmare_pic)
+
+#list of scenes, music and backgrounds for boss rush mode {TO UPDATE}
+musicRush_list = [BattleTheme1,AkobosBattle,NightmareBattle]
+background_list = [school,hill,dreamspace]
 
 #main functions used by the game (the main while loop)
+#mass resetting
+def resetAll():
+    '''reset all battle characters, before boss rush or custom battle'''   
+    ExceedraMain.reset()
+    Hydranoid.reset()
+    Destiny.reset()
+    Akobos.reset()
+    Nightmare.reset()
+    Overlord.reset()
+    ExceedraDark.reset()
+    
+    OverlordC.reset()
+    AkobosC.reset()
+    NightmareC.reset()
+    HydranoidC.reset()
+
 #plays music and sound
 def playMusic(sound,Type,Forever=False):
     '''
@@ -531,7 +574,7 @@ def make_text(text,font,size,color,x,y):
     TextRectangle.center = (x,y)
     screen.blit(TextSurface, TextRectangle)
 
-#pause and unpause the game            
+#pause and unpause the game (you can only unpause after pausing)      
 def unpause():
     '''unpauses the game'''
     global pause
@@ -560,7 +603,29 @@ def pause_the_game():
                     
         pygame.display.flip()
 
-#These next 3 functions make the dialogue run smoothly...
+#wait a moment... functions
+def wait(sound=None):
+    '''
+    wait untils a sound is done playing before you can continue with dialogue
+    used for BattleWon, NihgtmareScream and NightmareDeath sounds
+    '''
+    global dialogue_index
+    
+    if sound != None:
+        playMusic(sound,'sound')
+    while pygame.mixer.get_busy():
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE:
+                    dialogue_index -= 1
+                if event.key == pygame.K_0:
+                    pygame.quit()
+                    sys.exit()
+
+#These next 3 functions make the dialogue run smoothly (shows the text in a box)...
 #and makes it look nice too! :)   good job Jin!
 def draw_text(surface, text, font, x, y, color=black, max_width=SCREEN_WIDTH-40):
     '''render text with wrapping, for dialogues'''
@@ -600,8 +665,7 @@ def draw_hint_text():
 
 #ultimately, they make...
 def dialogueBox(scene_list):
-    '''combines above 3 functions to make the dialogue for story scenes'''
-    global dialogue_index, DIALOGUE_FONT, SCREEN_HEIGHT
+    '''combines above 3 functions to make the dialogue for story scenes'''    
     draw_text_box()
     if dialogue_index < len(scene_list):
         draw_text(screen, scene_list[dialogue_index], DIALOGUE_FONT, 20, SCREEN_HEIGHT - 110)
@@ -609,14 +673,14 @@ def dialogueBox(scene_list):
 
 #in-game BUTTONS! (not the ones you button your shirt with)
 def make_button(text,font,text_size,text_color,x,y,button_width,button_height,button_color,highlight_color,Type,action):
-    '''as per the name, function to make buttons. shows text made with make_text at text_color, 
+    '''as per the name, function to make buttons. shows text made with make_text at text_color and size text_size, 
     button_color is the button's color and whenever the cursor is on the button, 
-    its colors turns to highlight_color if the button is associated to a function, 
-    the function call is placed at action; None is for the opponent's move in battle, 'Nope' is to tell you to use recover when you're out of energy 
-    Type is for me, to see if it's a menu or battle button
+    its colors turns to highlight_color; if the button is associated to a task, 
+    its name is placed at action; None is for the opponent's move in battle, 'Nope' is to tell you to use recover when you're out of energy 
+    Type is for me, to see if it's a menu or battle button (though this function uses the scene to determine which action can be done when)
     '''
     #all possible things with the button (when clicking)
-    global scene, dialogue_index, CH1, CH2, BACKGROUND, ZE_BATTLE, MUSIC #lots of global variables to consider
+    global scene, dialogue_index, CH1, CH2, BACKGROUND, ZE_BATTLE, MUSIC, battle_ON, choosing, battle_e1_s2, battle_e1_s4, battle_e1_s5 #lots of global variables to consider
     
     #collision detection with the mouse (unfortunately we gotta redefine the mouse in here too)
     rect = pygame.Rect(x,y,button_width,button_height)
@@ -632,19 +696,96 @@ def make_button(text,font,text_size,text_color,x,y,button_width,button_height,bu
             dialogue_index = 0
             if action == 'scene_1':
                 playMusic(Dreamspace_theme,'music',Forever=True)
-        elif scene in ['battle_e1_s2','battle_e1_s4','battle_e1_s5','battle_e2_s1']:
+            elif action == 'bo':
+                battle_ON, scene = True, 'b1'
+                playMusic(BattleTheme1,'music',Forever=True)
+            elif action == 'choose':
+                scene = 'choose'
+        elif scene == 'choose':
+            if action == 'select Exceedra':
+                if CH1 != NullPerson and CH2 == NullPerson: #if first character already picked
+                    CH2 = ExceedraMain #make exceedra the second
+                    pygame.time.delay(500)
+                elif CH1 == NullPerson and CH2 == NullPerson:
+                    CH1 = ExceedraMain #else make the first
+                    pygame.time.delay(500)
+            elif action == 'select Hydranoid':
+                if CH1 != NullPerson and CH2 == NullPerson:
+                    CH2 = Hydranoid
+                    pygame.time.delay(500)
+                elif CH1 == NullPerson and CH2 == NullPerson:
+                    CH1 = HydranoidC
+                    pygame.time.delay(500)
+            elif action == 'select Destiny':
+                if CH1 != NullPerson and CH2 == NullPerson:
+                    CH2 = Destiny
+                    pygame.time.delay(500)
+                elif CH1 == NullPerson and CH2 == NullPerson:
+                    CH1 = Destiny
+                    pygame.time.delay(500)
+            elif action == 'select Akobos':
+                if CH1 != NullPerson and CH2 == NullPerson:
+                    CH2 = Akobos
+                    pygame.time.delay(500)
+                elif CH1 == NullPerson and CH2 == NullPerson:
+                    CH1 = AkobosC
+                    pygame.time.delay(500)
+            elif action == 'select Nightmare':
+                if CH1 != NullPerson and CH2 == NullPerson:
+                    CH2 = Nightmare
+                    pygame.time.delay(500)
+                elif CH1 == NullPerson and CH2 == NullPerson:
+                    CH1 = NightmareC
+                    pygame.time.delay(500)
+            elif action == 'select Overlord':
+                if CH1 != NullPerson and CH2 == NullPerson:
+                    CH2 = Overlord
+                    pygame.time.delay(500)
+                elif CH1 == NullPerson and CH2 == NullPerson:
+                    CH1 = OverlordC
+                    pygame.time.delay(500)
+            elif action == 'select ExceedraDark':
+                if CH1 != NullPerson and CH2 == NullPerson:
+                    CH2 = ExceedraDark
+                    pygame.time.delay(500)
+                elif CH1 == NullPerson and CH2 == NullPerson:
+                    CH1 = ExceedraDark
+                    pygame.time.delay(500)
+            elif action == 'Nothing':
+                print('Nuh-uh! Use backspace to deselect!')
+            elif action == CustomBattle:
+                BACKGROUND = dreamspace
+                ZE_BATTLE = '0'
+                MUSIC = BattleTheme1
+                choosing, battle_ON, scene = False, True, '0'
+                playMusic(MUSIC,'music',Forever=True)
+        elif scene in ['try_again1','try_again2','try_again3','try_again4']:
             if action == 'quit': #to quit the game after losing a battle
                 pygame.quit()
                 sys.exit()
             elif action == Battle: #to restart the battle after losing, with the saved parameters
                 #reset characters' stats
-                CH1 = CH1.reset()
-                CH2 = CH2.reset()
+                CH1.reset()
+                CH2.reset()
                 #start the battle
                 pygame.mixer.music.stop()
+                pygame.mixer.stop()
+                if ZE_BATTLE == 'battle_e1_s2': #{TO UPDATE}
+                    battle_ON, battle_e1_s2, scene = True, True, ZE_BATTLE
+                elif ZE_BATTLE == 'battle_e1_s4':
+                    battle_ON, battle_e1_s4, scene = True, True, ZE_BATTLE
+                elif ZE_BATTLE == 'battle_e1_s5':
+                    battle_ON, battle_e1_s5, scene = True, True, ZE_BATTLE
                 playMusic(MUSIC,'music',Forever=True)
-                action(CH1, CH2, BACKGROUND, ZE_BATTLE, MUSIC)
-            elif action == None:
+            elif action == 'restart':
+                print()
+                pygame.mixer.music.stop()
+                pygame.mixer.stop()
+                CH1.reset()
+                CH2.reset()
+                scene = 'start_menu'
+        elif scene in list_of_battle_scenes:
+            if action == None:
                 print("Nuh-Uh! Use your own moves!")
             elif action == 'Nope':
                 print('Use Recover!') #aka do nothing; no worries, this won't cause a turn to go by, since the opponent also won't do anything (he only does things when Attack, Guard or Recover)
@@ -666,9 +807,9 @@ def Menu():
     makes the menu, which contains the title and buttons that activate scenes and therefore episodes
     of the story
     '''
+    global score
     #background colour
     screen.fill(black)
-    
     #title (game name)
     make_text("Z-Legends: Exceedra's Awakening",'comicsansms',70,white,SCREEN_WIDTH/2,100)
     #buttons for each episode
@@ -679,18 +820,40 @@ def Menu():
         make_button('Episode 3','Corbel',35,white,500,410,200,70,red,green,'menu','scene_11')
     if Episode3_completed:
         make_button('Final Episode','Corbel',35,white,500,510,200,70,red,green,'menu','scene_16_1')
+    if Game_completed:
+        make_button('Boss Rush','Corbel',35,white,375,610,200,70,red,green,'menu','bo')
+        make_button('Custom Battle','Corbel',35,white,625,610,200,70,red,green,'menu','choose')
+        make_text(f"Score: {score}",'Corbel',25,white,470,700)
     
-#the 5 battle-system functions
-#game over (if you lose your battle)
-def try_again(character1,character2,background,battle_name,music):
+#the 11 battle-system functions
+#game over (asks to try again or quit the game)
+def try_again():
     '''tell the user to try again after losing a battle'''
-    #lost the battle sound    
-    playMusic(BattleLost,'sound')
     #buttons
     screen.fill(black)
     make_button('Try again?','Corbel',35,white,500,260,200,70,red,green,'battle',Battle)
     make_button('I give up...','Corbel',35,white,500,560,200,70,red,green,'battle','quit')
         
+    pygame.display.flip()
+    
+def try_againRush():
+    '''tell the user to restart the boss rush challenge'''
+    global score
+    #buttons and text
+    screen.fill(black)
+    make_button('Try again?','Corbel',35,white,500,260,200,70,red,green,'battle','restart')
+    make_text(f"Score: {score}",'Corbel',50,white,SCREEN_WIDTH/2,SCREEN_HEIGHT/2+75)
+    make_button('I give up...','Corbel',35,white,500,560,200,70,red,green,'battle','quit')
+    
+    pygame.display.flip()
+    
+def try_againCustom():
+    '''tell the user to start a new custom battle'''
+    #buttons
+    screen.fill(black)
+    make_button('Try again?','Corbel',35,white,500,260,200,70,red,green,'battle','restart')
+    make_button("I'm done...",'Corbel',35,white,500,560,200,70,red,green,'battle','quit')
+    
     pygame.display.flip()
 
 #rock-paper-scissors like: rock=attack, paper=guard, scissors=recover
@@ -701,11 +864,15 @@ def Attack(character1,character2):
     if opponent_move == character2.GuardMove: #if opponent guards and you attack, no damage
         character2.losePower(0,character2.GuardMove.energy_consumption)
         character1.losePower(0,character1.AttackMove.energy_consumption)
+        if character1.energy < 0:
+            character1.energy = 0
         print(character1.name,'did ATTACK;',character2.name,'did',opponent_move.specialty) #description of the turn
         
     elif opponent_move == character2.RecoverMove: #if opponent recovers and you attack, damage for the opponent
         character2.losePower(character1.AttackMove.damage,0)
         character1.losePower(0,character1.AttackMove.energy_consumption)
+        if character1.energy < 0:
+            character1.energy = 0
         print(character1.name,'did ATTACK;',character2.name,'did',opponent_move.specialty) #description of the turn
         
     elif opponent_move == character2.AttackMove: #if both of you attack
@@ -729,11 +896,13 @@ def Attack(character1,character2):
         if potential1 >= potential2:
             character2.losePower(character1.AttackMove.damage,0)
             character1.losePower(0,character1.AttackMove.energy_consumption)
-            print(character1.name,'did ATTACK;',character2.name,'did',opponent_move.specialty,'but',character1.name,'landed damage!') #description of the turn
+            if character1.energy < 0:
+                character1.energy = 0
+            print(f"{character1.name} did ATTACK; {character2.name} did {opponent_move.specialty}, but {character1.name} landed damage!") #description of the turn
         else:
             character1.losePower(character2.AttackMove.damage,0)
             character2.losePower(0,character2.AttackMove.energy_consumption)
-            print(character1.name,'did ATTACK;',character2.name,'did',opponent_move.specialty,', but',character2.name,'landed damage!') #description of the turn
+            print(f"{character1.name} did ATTACK; {character2.name} did {opponent_move.specialty}, but {character2.name} landed damage!") #description of the turn
         
 
 def Guard(character1,character2):
@@ -742,10 +911,14 @@ def Guard(character1,character2):
     if opponent_move == character2.AttackMove: #if the opponent attacks and you guard, no damage
         character1.losePower(0,character1.GuardMove.energy_consumption)
         character2.losePower(0,character2.AttackMove.energy_consumption)
+        if character1.energy < 0:
+            character1.energy = 0
         
     elif opponent_move == character2.GuardMove: #if the opponent guards and you guard, nothing
         character1.losePower(0,character1.GuardMove.energy_consumption)
         character2.losePower(0,character2.GuardMove.energy_consumption)
+        if character1.energy < 0:
+            character1.energy = 0
         
     elif opponent_move == character2.RecoverMove: #if the opponent recovers and you guard, they recover, you nothing
         character1.losePower(0,character1.GuardMove.energy_consumption)
@@ -778,22 +951,25 @@ def Recover(character1,character2):
     elif opponent_move == character2.AttackMove: #if the opponent attacks and you recover, you take damage
         character1.losePower(character2.AttackMove.damage,0)
         character2.losePower(0,character2.AttackMove.energy_consumption)
+        if character1.energy < 0:
+            character1.energy = 0
     
-    #if you recover up to your max stats:
+    #if you recover up to your min or max stats:
     if character1.health > character1.og_health:
         character1.health = character1.og_health
     if character1.energy > character1.og_energy:
-        character1.energy = character1.og_energy  
+        character1.energy = character1.og_energy
         
     print(character1.name,'did RECOVER;',character2.name,'did',opponent_move.specialty) #description of the turn
         
-#run the battle      
+#run the battle  {NEXT 4 FUNCTIONS TO UPDATE}
 def Battle(character1,character2,background,battle_name,music):
     '''function for battles
-    next_scene is function call of following scene in story
     character1 is playable character (usually Exceedra)
     character2 is npc opponent
+    background is the battle's background
     battle_name is to keep track of what battle is going on; the battle's corresponding scene has the same name
+    music is the battle theme playing
     '''
     #start the battle    
     global Locked1, Locked2, dialogue_index, battle_ON, battle_e1_s2, battle_e1_s4, battle_e1_s5, battle_e2_s1, CH1, CH2, BACKGROUND, ZE_BATTLE, MUSIC, pause, scene
@@ -865,11 +1041,16 @@ def Battle(character1,character2,background,battle_name,music):
                         
             #losing
             if character1.health <= 0 and character2.health > 0:
+                print(character1.name,'lost! Wanna try again, or quit?')
+                print()
                 pygame.mixer.music.stop()
-                try_again(character1,character2,background,battle_name,music)
+                playMusic(BattleLost,'sound')
+                battle_ON, battle_e1_s2, scene = False, False, 'try_again1'
             
             #winning
             elif character1.health > 0 and character2.health <= 0:
+                print(character1.name,'won!')
+                print()
                 pygame.mixer.music.stop()
                 playMusic(BattleWon,'sound')
                 if battle_name == 'battle_e1_s2':
@@ -882,42 +1063,347 @@ def Battle(character1,character2,background,battle_name,music):
         
         pygame.display.flip()
 
+def BattleRush(character1,character2,background,battle_name,music):
+    '''function for battles in boss rush mode
+    next_scene is function call of following scene in story
+    character1 is playable character (usually Exceedra)
+    character2 is npc opponent
+    battle_name is to keep track of what battle is going on so we can move on to the next; same as the name of the scene
+    '''
+    #start the battle    
+    global Locked1, Locked2, battle_ON, CH1, CH2, BACKGROUND, ZE_BATTLE, MUSIC, pause, scene, list_of_battle_scenes, musicRush_list, score
+    #save the parameters in the global variables so we can use them in external functions (functions not directly connected to this one) requiring them
+    CH1 = character1
+    CH2 = character2
+    BACKGROUND = background
+    ZE_BATTLE = battle_name
+    MUSIC = music
+    i = list_of_battle_scenes.index(battle_name)
+    k = musicRush_list.index(music)
+    
+    #during the battle
+    while battle_ON:
+        for event in pygame.event.get():
+            #pausing and/or exiting
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_p:
+                    pause = True
+                    pause_the_game()
+                if event.key == pygame.K_0:
+                    pygame.quit()
+                    sys.exit()
+                
+            #setup the background and character placements
+            screen.blit(background,(0, 0))
+            make_text(f"Score: {score}",'arialblack',35,white,100,30)
+            if battle_name == 'b1':
+                character1.BattlePosition(0, SCREEN_HEIGHT-500) #exceedra
+                character2.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-650) #hydranoid
+            elif battle_name == 'b2' or battle_name == 'b3':
+                character1.BattlePosition(0, SCREEN_HEIGHT-500) #exceedra
+                character2.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-500) #akobos/nightmare
+            elif battle_name == 'b4':
+                pass
+                    
+            #controlling energy and buttons for character 1 (usually Exceedra)
+            if character1.energy < character1.AttackMove.energy_consumption or character1.energy < character1.GuardMove.energy_consumption:
+                Locked1 = True
+            elif character1.energy > character1.AttackMove.energy_consumption and character1.energy > character1.GuardMove.energy_consumption:
+                Locked1 = False
+            
+            if Locked1 == True:
+                make_button(character1.AttackMove.name,'Corbel',15,white,100,600,100,70,black,black,'battle','Nope')
+                make_button(character1.GuardMove.name,'Corbel',15,white,250,600,100,70,black,black,'battle','Nope')
+                make_button(character1.RecoverMove.name,'Corbel',15,GREEN,400,600,100,70,yellow,pale_yellow,'battle',Recover)
+                make_text('USE RECOVER!',"comicsansms",100,RED,SCREEN_WIDTH/2,SCREEN_HEIGHT/2)
+            else:
+                make_button(character1.AttackMove.name,'Corbel',15,white,100,600,100,70,red,pale_red,'battle',Attack)
+                make_button(character1.GuardMove.name,'Corbel',15,white,250,600,100,70,green,pale_green,'battle',Guard)
+                make_button(character1.RecoverMove.name,'Corbel',15,GREEN,400,600,100,70,yellow,pale_yellow,'battle',Recover)    
+            
+            #controlling energy and buttons for character 2 (NPC Opponent; though it will probably never get to that)
+            if character2.energy < character2.AttackMove.energy_consumption or character2.energy < character2.GuardMove.energy_consumption:
+                Locked2 = True
+            elif character2.energy > character2.AttackMove.energy_consumption and character2.energy > character2.GuardMove.energy_consumption:
+                Locked2 = False
+            
+            if Locked2 == True:
+                character2.movepool = [character2.RecoverMove]
+                make_button(character2.AttackMove.name,'Corbel',15,white,700,600,100,70,black,black,'battle',None)
+                make_button(character2.GuardMove.name,'Corbel',15,white,850,600,100,70,black,black,'battle',None)
+                make_button(character2.RecoverMove.name,'Corbel',15,GREEN,1000,600,100,70,yellow,pale_yellow,'battle',None)
+            else:
+                character2.movepool = [character2.AttackMove, character2.GuardMove, character2.RecoverMove]
+                make_button(character2.AttackMove.name,'Corbel',15,white,700,600,100,70,red,pale_red,'battle',None)
+                make_button(character2.GuardMove.name,'Corbel',15,white,850,600,100,70,green,pale_green,'battle',None)
+                make_button(character2.RecoverMove.name,'Corbel',15,GREEN,1000,600,100,70,yellow,pale_yellow,'battle',None)
+                        
+            #losing
+            if character1.health <= 0 and character2.health > 0:
+                print('You lost! Would you like to try again, or quit?')
+                pygame.mixer.music.stop()
+                playMusic(BattleLost,'sound')
+                battle_ON, scene = False, 'try_again2'
+            
+            #winning
+            elif character1.health > 0 and character2.health <= 0:
+                if battle_name != 'b3': #b3 temporary
+                    print()
+                    pygame.mixer.music.stop()
+                    battle_ON, scene = False, list_of_battle_scenes[i+1]
+                    playMusic(musicRush_list[k+1],'music',Forever=True)
+                else:
+                    print()
+                    score += 1
+                    pygame.mixer.music.stop()
+                    playMusic(BattleWon,'sound')
+                    battle_ON, scene = False, "start_menu"
+        
+        pygame.display.flip()
+    
+#custom battle functions
+def chooseYourCharacter():
+    '''
+    leads you to kinda like a smash bros character select screen before your cudtom battle
+    '''
+    global scene, CH1, CH2, choosing, pause
+    
+    while choosing:
+        the_two_are_selected = CH1 != NullPerson and CH2 != NullPerson
+        #only when both characters have been selected that they show up with the GO! button    
+        if the_two_are_selected == False:
+            screen.fill(black)
+            #instructions
+            make_text("Choose 2 characters, then GO!",'comicsansms',70,white,SCREEN_WIDTH/2,100)
+            #buttons for each character (all battle characters in the story available, even vilains)
+            make_button(ExceedraMain.name,'Corbel',15,white,100,200,100,70,red,green,'menu','select Exceedra')
+            make_button(Destiny.name,'Corbel',15,white,250,200,100,70,red,green,'menu','select Destiny')
+            make_button(Hydranoid.name,'Corbel',15,white,400,200,100,70,red,green,'menu','select Hydranoid')       
+            make_button(Overlord.name,'Corbel',15,white,550,200,100,70,red,green,'menu','select Overlord')
+            make_button(Akobos.name,'Corbel',15,white,700,200,100,70,red,green,'menu','select Akobos')
+            make_button(Nightmare.name,'Corbel',15,white,850,200,100,70,red,green,'menu','select Nightmare')    
+            make_button(ExceedraDark.name,'Corbel',15,white,1000,200,100,70,red,green,'menu','select ExceedraDark')
+        else:
+            screen.fill(black)
+            make_text("Choose 2 characters, then GO!",'comicsansms',70,white,SCREEN_WIDTH/2,100)
+            make_button(ExceedraMain.name,'Corbel',15,white,100,200,100,70,black,black,'menu','Nothing')
+            make_button(Destiny.name,'Corbel',15,white,250,200,100,70,black,black,'menu','Nothing')
+            make_button(Hydranoid.name,'Corbel',15,white,400,200,100,70,black,black,'menu','Nothing')
+            make_button(Overlord.name,'Corbel',15,white,550,200,100,70,black,black,'menu','Nothing')
+            make_button(Akobos.name,'Corbel',15,white,700,200,100,70,black,black,'menu','Nothing')
+            make_button(Nightmare.name,'Corbel',15,white,850,200,100,70,black,black,'menu','Nothing')
+            make_button(ExceedraDark.name,'Corbel',15,white,1000,200,100,70,black,black,'menu','Nothing')
+            #show your selects and start button
+            #some problems with positioning Hydranoid or the Overlord nicely...
+            make_text(CH1.name,'Corbel',35,white,200,350)
+            make_text(CH2.name,'Corbel',35,white,SCREEN_WIDTH-400,350)
+            if CH1 == HydranoidC and CH2 == Hydranoid:
+                CH1.BattlePosition(0, SCREEN_HEIGHT-650)
+                CH2.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-650)
+                make_button('GO!','Corbel',35,white,1000,600,100,70,red,green,'menu',CustomBattle)
+            elif CH1 == HydranoidC and CH2 != Hydranoid:
+                CH1.BattlePosition(0, SCREEN_HEIGHT-650)
+                CH2.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-500)
+                make_button('GO!','Corbel',35,white,1000,600,100,70,red,green,'menu',CustomBattle)
+            elif CH1 != HydranoidC and CH2 == Hydranoid:
+                CH1.BattlePosition(0, SCREEN_HEIGHT-500)
+                CH2.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-650)
+                make_button('GO!','Corbel',35,white,1000,600,100,70,red,green,'menu',CustomBattle)
+            else:
+                CH1.BattlePosition(0, SCREEN_HEIGHT-500)
+                CH2.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-500)
+                make_button('GO!','Corbel',35,white,1000,600,100,70,red,green,'menu',CustomBattle)
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_p:
+                    pause = True
+                    pause_the_game()
+                if event.key == pygame.K_0:
+                    pygame.quit()
+                    sys.exit()
+                if event.key == pygame.K_1: #press 1 to get back to main menu
+                    choosing = False
+                    scene = 'start_menu'
+                if event.key == pygame.K_BACKSPACE:  #reset your picks (press Backspace)
+                    CH1 = NullPerson
+                    CH2 = NullPerson
+    
+        pygame.display.flip()
+    pygame.display.flip()
+
+def CustomBattle(character1,character2,background,battle_name,music):
+    '''function for battles in custom battle mode
+    next_scene is function call of following scene in story
+    character1 is playable character (usually Exceedra)
+    character2 is npc opponent
+    battle_name is to keep track of what battle is going on so we can move on to the next; same as the name of the scene
+    '''
+    global Locked1, Locked2, battle_ON, CH1, CH2, BACKGROUND, ZE_BATTLE, MUSIC, pause, scene
+    CH1 = character1
+    CH2 = character2
+    BACKGROUND = background
+    ZE_BATTLE = battle_name
+    MUSIC = music
+    
+    while battle_ON:
+        for event in pygame.event.get():
+            #pausing and/or exiting
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_p:
+                    pause = True
+                    pause_the_game()
+                if event.key == pygame.K_0:
+                    pygame.quit()
+                    sys.exit()
+                
+            #setup the background and character placements
+            #even more problems with positioning Hydranoid or the Overlord nicely...
+            screen.blit(background,(0, 0))
+            if character1 == ExceedraMain and character2 == Hydranoid:
+                character1.BattlePosition(0, SCREEN_HEIGHT-500) #exceedra
+                character2.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-650) #hydranoid
+            elif character1 == ExceedraMain and (character2 == Akobos or character2 == Nightmare):
+                character1.BattlePosition(0, SCREEN_HEIGHT-500) #exceedra
+                character2.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-500) #akobos/nightmare
+            elif character1 == OverlordC and character2 != Overlord:
+                character1.BattlePosition(0, SCREEN_HEIGHT-550)
+                character2.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-500)
+            elif character2 == Overlord and character1 != OverlordC:
+                character1.BattlePosition(0, SCREEN_HEIGHT-500)
+                character2.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-550)
+            elif character1 == OverlordC and character2 == Overlord:
+                character1.BattlePosition(0, SCREEN_HEIGHT-550)
+                character2.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-550)
+            elif character1 == HydranoidC and character2 != Hydranoid:
+                character1.BattlePosition(0, SCREEN_HEIGHT-650)
+                character2.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-500)
+            elif character2 == Hydranoid and character1 != HydranoidC:
+                character1.BattlePosition(0, SCREEN_HEIGHT-500)
+                character2.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-650)
+            elif character1 == HydranoidC and character2 == Hydranoid:
+                character1.BattlePosition(0, SCREEN_HEIGHT-650)
+                character2.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-650)
+            else:
+                character1.BattlePosition(0, SCREEN_HEIGHT-500)
+                character2.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-500)
+                    
+            #controlling energy and buttons for character 1
+            if character1.energy < character1.AttackMove.energy_consumption or character1.energy < character1.GuardMove.energy_consumption:
+                Locked1 = True
+            elif character1.energy > character1.AttackMove.energy_consumption and character1.energy > character1.GuardMove.energy_consumption:
+                Locked1 = False
+            
+            if Locked1 == True:
+                make_button(character1.AttackMove.name,'Corbel',15,white,100,600,100,70,black,black,'battle','Nope')
+                make_button(character1.GuardMove.name,'Corbel',15,white,250,600,100,70,black,black,'battle','Nope')
+                make_button(character1.RecoverMove.name,'Corbel',15,GREEN,400,600,100,70,yellow,pale_yellow,'battle',Recover)
+                make_text('USE RECOVER!',"comicsansms",100,RED,SCREEN_WIDTH/2,SCREEN_HEIGHT/2)
+            else:
+                make_button(character1.AttackMove.name,'Corbel',15,white,100,600,100,70,red,pale_red,'battle',Attack)
+                make_button(character1.GuardMove.name,'Corbel',15,white,250,600,100,70,green,pale_green,'battle',Guard)
+                make_button(character1.RecoverMove.name,'Corbel',15,GREEN,400,600,100,70,yellow,pale_yellow,'battle',Recover)    
+            
+            #controlling energy and buttons for character 2 (NPC Opponent; though it will probably never get to that)
+            if character2.energy < character2.AttackMove.energy_consumption or character2.energy < character2.GuardMove.energy_consumption:
+                Locked2 = True
+            elif character2.energy > character2.AttackMove.energy_consumption and character2.energy > character2.GuardMove.energy_consumption:
+                Locked2 = False
+            
+            if Locked2 == True:
+                character2.movepool = [character2.RecoverMove]
+                make_button(character2.AttackMove.name,'Corbel',15,white,700,600,100,70,black,black,'battle',None)
+                make_button(character2.GuardMove.name,'Corbel',15,white,850,600,100,70,black,black,'battle',None)
+                make_button(character2.RecoverMove.name,'Corbel',15,GREEN,1000,600,100,70,yellow,pale_yellow,'battle',None)
+            else:
+                character2.movepool = [character2.AttackMove, character2.GuardMove, character2.RecoverMove]
+                make_button(character2.AttackMove.name,'Corbel',15,white,700,600,100,70,red,pale_red,'battle',None)
+                make_button(character2.GuardMove.name,'Corbel',15,white,850,600,100,70,green,pale_green,'battle',None)
+                make_button(character2.RecoverMove.name,'Corbel',15,GREEN,1000,600,100,70,yellow,pale_yellow,'battle',None)
+                        
+            #losing
+            if character1.health <= 0 and character2.health > 0:
+                print('You lost! Wanna try again with new or same characters, or stop for now?')
+                print()
+                pygame.mixer.music.stop()
+                playMusic(BattleLost,'sound')
+                battle_ON, scene = False, 'try_again3'
+            
+            #winning
+            elif character1.health > 0 and character2.health <= 0:
+                print('You won! Wanna try again with new or same characters, or stop for now?')
+                print()
+                pygame.mixer.music.stop()
+                playMusic(BattleWon,'sound')
+                battle_ON, scene = False, 'try_again3'
+        
+        pygame.display.flip()
+
+def Battle2Chars(character1,character2,character3,background,battle_name,music): #{TO UPDATE}
+    '''
+    special type of battle where you can use 2 characters for your side 
+    by pressing s, you can switch between characters
+    still 1 opponent, so this type is a 2v1 battle
+    mainly used for Episode 3 and Final Episode battles (especially the game's final boss)
+    '''
+    global Locked1, Locked2, dialogue_index, battle_ON, CH1, CH2, BACKGROUND, ZE_BATTLE, MUSIC, pause, scene
+    pass
+    
 #credits, when all episodes are beaten
 def Credits():
     '''
-    the credits!!!
+    the credits!!! (not animated, though...)
     '''
     global scene, rollcall
     while rollcall:
         #black background
-        screen.fill(black)
+        screen.fill(blue)
         #the end (big)
-        make_text('THE END','arialblack',115,white,SCREEN_WIDTH/2,SCREEN_WIDTH/2)
-        #names of the creators and collaborators {TO UPDATE}
-        
-        #to quit the credits and go back to menu
+        make_text('THE END','arialblack',60,white,SCREEN_WIDTH/2,SCREEN_HEIGHT/2-150)
+        #names of the creators and collaborators and thank players
+        make_text('THANK YOU FOR PLAYING!!!','arialblack',75,white,SCREEN_WIDTH/2,SCREEN_HEIGHT/2)
+        make_text('Made by:','arialblack',40,white,SCREEN_WIDTH/2,SCREEN_HEIGHT/2+150)
+        make_text('LordZagger (Story, OST, Rulebook, Coding)','arialblack',40,white,SCREEN_WIDTH/2,SCREEN_HEIGHT/2+200)
+        make_text('Jin4843 (Drawings, Rulebook, Coding)','arialblack',40,white,SCREEN_WIDTH/2,SCREEN_HEIGHT/2+250)
+        #to quit the credits and go back to menu, press 1, where custom battle and boss rush should now be available
         for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_1:
                     rollcall = False
                     scene = 'start_menu'
+                if event.key == pygame.K_0:
+                    pygame.quit()
+                    sys.exit()
             
         pygame.display.flip()
 
 
 #main while loop of the game, that takes all the variables and functions
 #to make the whole game run
-while running:
+while True:
     #get mouse position, continuously, while playing
     mouse = pygame.mouse.get_pos()
     #if the player quits, or to move along with the dialogue and story,
     #and do story-battle transitions
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running = False #exits out of the while running loop and into the exit statements at the end of the code
+            pygame.quit()
+            sys.exit()
         if event.type == pygame.KEYDOWN:
             if battle_ON == False:
-                if event.key == pygame.K_RETURN: #press return to keep going with the dialogue, also handles story-battle transitions and setting transitions
+                if event.key == pygame.K_RETURN: #press return to keep going with the dialogue, handles story to battle transitions
                     if scene == "scene_1" and dialogue_index < len(scene_1_dialogue):
                         dialogue_index += 1
                         playMusic(press_button_sound,'sound')
@@ -927,7 +1413,7 @@ while running:
                         elif dialogue_index >= len(scene_1_dialogue):
                             pygame.mixer.music.stop()
                             scene = "scene_2"
-                            dialogue_index = -1
+                            dialogue_index = 0
                             playMusic(Hydranoid_DestinyTheme,'music',Forever=True)
                             
                     elif scene == "scene_2" and dialogue_index != 22:
@@ -938,14 +1424,15 @@ while running:
                             battle_ON, battle_e1_s2, scene = True, True, 'battle_e1_s2'  # Trigger battle and get out of dialogue
                             playMusic(BattleTheme1,'music',Forever=True)
                         elif dialogue_index == 33:
+                            pygame.mixer.stop()
                             pygame.mixer.music.stop()
                             playMusic(ExceedraLonelyTheme2,'music',Forever=True)
                         elif dialogue_index >= len(scene_2_dialogue):
                             pygame.mixer.music.stop()
-                            ExceedraMain = ExceedraMain.reset()
-                            Hydranoid = Hydranoid.reset()
+                            ExceedraMain.reset()
+                            Hydranoid.reset()
                             scene = "scene_3"
-                            dialogue_index = -1
+                            dialogue_index = 0
                             playMusic(LibraryTheme,'music',Forever=True)
                             
                     elif scene == "scene_3" and dialogue_index < len(scene_3_dialogue):
@@ -960,7 +1447,7 @@ while running:
                         elif dialogue_index >= len(scene_3_dialogue):
                             pygame.mixer.music.stop()
                             scene = "scene_4"
-                            dialogue_index = -1
+                            dialogue_index = 0
                             
                     elif scene == "scene_4" and dialogue_index != 18:
                         dialogue_index += 1
@@ -973,11 +1460,12 @@ while running:
                             battle_ON, battle_e1_s4, scene = True, True, 'battle_e1_s4'  # Trigger battle and get out of dialogue
                             playMusic(AkobosBattle,'music',Forever=True)
                         elif dialogue_index >= len(scene_4_dialogue):
+                            pygame.mixer.stop()
                             pygame.mixer.music.stop()
-                            ExceedraMain = ExceedraMain.reset()
-                            Akobos = Akobos.reset()
+                            ExceedraMain.reset()
+                            Akobos.reset()
                             scene = "scene_5"
-                            dialogue_index = -1
+                            dialogue_index = 0
                             
                     elif scene == "scene_5" and dialogue_index != 37:
                         dialogue_index += 1
@@ -987,31 +1475,37 @@ while running:
                             playMusic(NightmareAppears,'music',Forever=True)
                         elif dialogue_index == 37:
                             pygame.mixer.music.stop()
+                            pygame.time.delay(100)
                             playMusic(NightmareScream,'sound')
                             battle_ON, battle_e1_s5, scene = True, True, 'battle_e1_s5'  # Trigger battle and get out of dialogue
+                            wait()
                             playMusic(NightmareBattle,'music',Forever=True)
                         elif dialogue_index == 41:
+                            pygame.mixer.stop()
                             pygame.mixer.music.stop()
                             playMusic(NightmareDying,'music',Forever=True)
                         elif dialogue_index == 48:
                             pygame.mixer.music.stop()
-                            playMusic(NightmareDeath,'sound')
-                            ExceedraMain = ExceedraMain.reset()
-                            Nightmare = Nightmare.reset()
+                            ExceedraMain.reset()
+                            Nightmare.reset()   
+                            wait(NightmareDeath)
                         elif dialogue_index >= len(scene_5_dialogue):
-                            pygame.mixer.music.stop()
                             Episode1_completed = True
+                            Game_completed = True #TEMPORARY SO PLAYERS CAN TRY OUT CUSTOM BATTLE AND BOSS RUSH MODES (EARLY)
                             scene = "start_menu"
-                            dialogue_index = -1
+                            dialogue_index = 0
                     
                     elif scene == 'scene_6': #{TO UPDATE}
-                        #dialogue_index += 1
+                        dialogue_index += 1
                         playMusic(press_button_sound,'sound')
                             
                 if event.key == pygame.K_BACKSPACE:  # On Backspace key
                     if dialogue_index > 0:
                         playMusic(press_button_sound,'sound')
-                        dialogue_index -= 1  # Go to previous line
+                        if (scene == 'scene_2' and dialogue_index == 23) or (scene == 'scene_4' and dialogue_index == 19) or (scene == 'scene_5' and dialogue_index == 38):
+                            dialogue_index += 0
+                        else:
+                            dialogue_index -= 1  # Go to previous line
                     else:
                         dialogue_index = 0  # Keep at the first line
             #pause or exit during story scenes (these 2 don't work during battles (though they should), which is why we have the whole pygame.event.get() also in the battle function)           
@@ -1021,6 +1515,9 @@ while running:
             if event.key == pygame.K_0:
                 pygame.quit() #press 0 to quit
                 sys.exit()
+            if event.key == pygame.K_1 and scene == 'scene_6':
+                dialogue_index = 0
+                scene = 'start_menu'
     
     #the menu screen
     if scene == 'start_menu':
@@ -1035,11 +1532,14 @@ while running:
         
     #episode 1, scene 2
     elif scene == 'scene_2':
-        screen.blit(school, (0, 0))
-        ExceedraMain.BattlePosition(100, 200)
-        Destiny.BattlePosition(300,200)
-        Hydranoid.BattlePosition(400,100)
-        dialogueBox(scene_2_dialogue)
+        if dialogue_index != 22:
+            screen.blit(school, (0, 0))
+            ExceedraMain.BattlePosition(100, 200)
+            Destiny.BattlePosition(300,200)
+            Hydranoid.BattlePosition(400,100)
+            dialogueBox(scene_2_dialogue)
+            if dialogue_index == 24: #wait for BattleWon to finish playing
+                wait()
     
     #battle in episode 1, scene 2: Exceedra VS Hydranoid
     elif scene == 'battle_e1_s2':
@@ -1053,7 +1553,7 @@ while running:
         Grace.BattlePosition(300,200)
         Ken.BattlePosition(400,200)
         dialogueBox(scene_3_dialogue)
-        if dialogue_index >= 22:
+        if dialogue_index >= 22: #setting or character placement changes from now on have the below format
             screen.blit(school, (0, 0))
             ExceedraMain.BattlePosition(100, 200)
             Hydranoid.BattlePosition(20,100)
@@ -1062,20 +1562,24 @@ while running:
     #episode 1, scene 4
     elif scene == "scene_4":
         screen.blit(hill, (0, 0))
-        ExceedraMain.BattlePosition(100, 200)
         dialogueBox(scene_4_dialogue)
-        if 5 <= dialogue_index < 10:
+        if 5 <= dialogue_index < 8:
+            screen.blit(hill, (0, 0))
+            Akobos.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-500)
+            dialogueBox(scene_4_dialogue)
+        if 8 <= dialogue_index < 10:
             screen.blit(hill, (0, 0))
             ExceedraMain.BattlePosition(100, 200)
             Akobos.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-500)
             dialogueBox(scene_4_dialogue)
-
         if dialogue_index >= 10 and dialogue_index != 18:
             screen.blit(hill, (0, 0))
             ExceedraMain.BattlePosition(100, 200)
             Hydranoid.BattlePosition(20,100)
             Akobos.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-500)
             dialogueBox(scene_4_dialogue)
+            if dialogue_index == 20:
+                wait()
     
     #battle in episode 1, scene 4: Exceedra VS Akobos
     elif scene == 'battle_e1_s4':
@@ -1100,6 +1604,8 @@ while running:
             ExceedraMain.BattlePosition(0, SCREEN_HEIGHT-500)
             Nightmare.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-500)
             dialogueBox(scene_5_dialogue)
+            if dialogue_index == 39:
+                wait()
     
     #battle in episode 1, scene 5: Exceedra VS Nightmare
     elif scene == 'battle_e1_s5':
@@ -1107,7 +1613,9 @@ while running:
             
     #episode 2, scene 1 (aka scene 6)
     elif scene == 'scene_6':
-        screen.fill(BLUE)
+        screen.blit(school, (0,0))
+        ExceedraMain.BattlePosition(100, 200)
+        Hydranoid.BattlePosition(400,100)
         make_text('EPISODE 2 WILL BE READY SOON! :)',"comicsansms",65,white,SCREEN_WIDTH/2,SCREEN_HEIGHT/2)
     
     elif scene == 'battle_e2_s1': #{TO UPDATE}
@@ -1117,13 +1625,46 @@ while running:
     elif scene == 'credits':
         rollcall = True
         Credits()
-            
+    
+    #boss rush mode {TO UPDATE}
+    elif scene == 'b1':
+        if CH1 == '' and CH2 == '':
+            score = 0
+            BattleRush(ExceedraMain,Hydranoid,background_list[0],'b1',musicRush_list[0])
+        else:
+            score = 0
+            resetAll()
+            BattleRush(ExceedraMain,Hydranoid,background_list[0],'b1',musicRush_list[0])
+    elif scene == 'b2':
+        score += 1
+        Hydranoid.reset()
+        battle_ON = True
+        BattleRush(ExceedraMain,Akobos,background_list[1],'b2',musicRush_list[1])
+    elif scene == 'b3':
+        score += 1
+        Akobos.reset()
+        battle_ON = True
+        BattleRush(ExceedraMain,Nightmare,background_list[2],'b3',musicRush_list[2])
+        
+    #custom battle mode {TO UPDATE}
+    elif scene == 'choose':
+        resetAll()
+        CH1 = NullPerson
+        CH2 = NullPerson
+        choosing = True
+        chooseYourCharacter()
+    elif scene == '0':
+        CustomBattle(CH1,CH2,BACKGROUND,ZE_BATTLE,MUSIC)
+    
+    #try agains
+    elif scene == 'try_again1':
+        try_again()
+    elif scene == 'try_again2':
+        try_againRush()
+    elif scene == 'try_again3':
+        try_againCustom()
+         
     #updates the display whenever needed
     #(WE LOVE U DISPLAY.FLIP(), THANK YOU FOR MAKING TRANSITIONS POSSIBLE!!!, AND FOR SOMEHOW WORKING EVERY TIME U NEED TO
-    #EVEN THOUGH YOU'RE ONLY CALLED THIS ONE TIME AT THE END OF THE CODE!)
+    #EVEN THOUGH YOU'RE ONLY CALLED ONLY THIS ONE TIME IN THE MAIN LOOP!)
     pygame.display.flip()
-    
-#exit the game, happens only when the main loop (while running) is exited
-#through the pygame.QUIT event; almost all of the time, game exit is done by pressing 0
-pygame.quit()
-sys.exit()
