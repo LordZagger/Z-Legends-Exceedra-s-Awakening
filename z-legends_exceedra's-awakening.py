@@ -53,7 +53,7 @@ Episode1_completed = False #to see which episodes are completed
 Episode2_completed = False
 Episode3_completed = False
 Episode4_completed = False
-Game_completed = True
+Game_completed = False
 #for restarting battles, we save the battle function call parameters in variables and call them as global in functions
 #for now, they're empty strings
 CH1 = '' 
