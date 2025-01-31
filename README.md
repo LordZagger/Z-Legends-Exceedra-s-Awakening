@@ -1,4 +1,4 @@
-# CHE120-Game-Project
+# Fall 2024 CHE120 Game Project: Z-Legends: Exceedra's Awakening
 V1.0
 Game Project due Dec. 3rd, 2024 for CHE120: Computer Literacy and Programming for Chemical Engineers
 Game made by Jeremy Bijoux (LordZagger) and Jinyong Lee (Jin4843), just because we wanted to make our own game (and Jeremy wanted to make the soundtrack) and for bonus marks ;)
