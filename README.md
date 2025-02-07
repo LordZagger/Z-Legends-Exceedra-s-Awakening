@@ -5,7 +5,7 @@ Game made by Jeremy Bijoux (LordZagger) and Jinyong Lee (Jin4843), just because 
 This is to track the progress of who did what in making the game, as well as a place to store all the images and files used in-game
 Of course, the GitHub reposity also has the python game file
 
-wav files are music, png files are images, py file is the game, and please check out the pdf Rulebook for more detailed instructions on how to play
+wav files are music, png files are images, py file is the game, and please check out the pdf Rulebook for more detailed instructions on how to play and the story setting
 
 V1.1
 There were issues with the game on the release of Dec 3rd (only part of episode 1), so Jeremy fixed the issues of Episode 1 from Dec 24-27
