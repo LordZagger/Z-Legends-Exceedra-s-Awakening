@@ -10,10 +10,12 @@ Of course, the GitHub reposity also has the python game file
 
 wav files are music, png files are images, py file is the game, and please check out the pdf Rulebook for more detailed instructions on how to play and the story setting
 
+
 V1.1
 There were issues with the game on the release of Dec 3rd (only part of episode 1), so Jeremy fixed the issues of Episode 1 from Dec 24-27
 
 We recommend playing the game on a software like Spyder, as there are some console prompts to keep track off during battles
+
 
 V1.2 - Jan 18, 2025
 (Oh boy... I really hope I don't forget to mention something...)
