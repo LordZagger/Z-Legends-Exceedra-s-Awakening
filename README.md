@@ -24,7 +24,7 @@ We recommend playing the game on a software like Spyder, as there are some conso
 
 This update adds 2 new modes to the game (Boss Rush and Custom Battle, see Rulebook), changes some functions around, etc. I'll try to name them all.
 
--Boss Rush mode, Custom Battle mode available after beating Episode 1
+-Boss Rush mode, Custom Battle mode available after beating Episode 1 (temporary: in the final version, these will be unlockable once the story is completed)
 
 -Destiny, Overlord and Dark Exceedra (who are supposed to appear as playable in Episode 2) are available early in Custom Battle
 
@@ -43,7 +43,7 @@ This update adds 2 new modes to the game (Boss Rush and Custom Battle, see Ruleb
 -new functions (e.g. wait and resetAll, which combine other functions/methods into one function so we don't take a lot of lines to repeat the same blocks of code in the main while loop)
 -more preparations for future episodes planted inside the code
 -credits function was completed (but not yet used ingame) 
--other minor changes to variables (e.g. no more while running, now the main loop is while True, and running has been removed
+-other minor changes to variables (e.g. no more while running, now the main loop is while True, and running has been removed)
 
 The next update (hopefully very soon) will have more themes for Episode 1, and with the updated OST, Episode 1 will TRULY be completed.
 Enjoy! -LordZagger (I'm not related to the characters btw)
