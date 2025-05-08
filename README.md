@@ -47,3 +47,30 @@ This update adds 2 new modes to the game (Boss Rush and Custom Battle, see Ruleb
 
 The next update (hopefully very soon) will have more themes for Episode 1, and with the updated OST, Episode 1 will TRULY be completed.
 Enjoy! -LordZagger (I'm not related to the characters btw)
+
+**V1.3 - May 8, 2025**
+
+Done. At long last done. Episode 1 OST is complete!!! Episode 1 is complete!!!!!! I had hoped that after releasing V1.3 I would get right on the OST... But I procrastinated. And co-op also got busy. But here we are! Not just with a completed OST for Episode 1, but some more good news:
+
+- Updated rulebook, which will especially help for some new additions to the story and Custom Battle mode
+
+- Minor changes to comments
+
+- Dialogue improvements
+
+- Exceedra vs Akobos has been changed to Exceedra and Hydranoid vs Akobos (a 2 vs 1, to match the story)
+
+- Dark Exceedra cut from Custom Battle (it's just not right to have him there without his sprite)
+
+- The old version of the reset method is back! This time, it's actually useful, since we need it to make clones of characters in some instances of Custom Battle
+
+- Custom and Random characters in Custom Battle! You may now design your own fighter (following rulebook and console prompts instructions), or use any random available character (top-left yellow buttons on character select screen)
+
+- Canon characters added to the lot of available Custom Battle fighters in addition to the energy-overloaded versions (a decision was made to use C characters as lore-accurate or easier versions of the opponent, and the energy-overloaded versions are used as tougher opponents)
+
+Alright, this is where things get serious. Though this file doesn't show it, we are actually very advanced into the coding of episodes 2-4. Honestly, we're almost done.
+The story has all been mapped out. The plan for the OST was made. Literally, all that is left to do is write the story, finish the OST, finish the character and background drawings. We can then fill in/replace some variables' assignments and add the proper character placements and story cues in the code... and we're done.
+
+One of my New Year's Resolution is to finish the game by the end of the year. Is it possible? Yes. Will it happen? It ultimately depends on how cooked we are for 1B, and then how much we procrastinate during our Fall co-op. Another thing is that we are undecided as to whether or not to release Episodes 2-4 one at a time, or all at once...
+
+Well, enjoy version 1.3! And look forward to the next update!
