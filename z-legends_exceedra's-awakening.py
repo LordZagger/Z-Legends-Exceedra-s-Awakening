@@ -546,27 +546,29 @@ class Character:
         '''
         #place the character
         if battle_ON == False:
-            if self.battle_pic != None and self.battle_pic != Junia_pic and self.battle_pic != Ken_pic and self.battle_pic != Grace_pic:
-                screen.blit(self.battle_pic, (x,y))
-            elif self.battle_pic != None and self.battle_pic == Junia_pic:
-                screen.blit(self.battle_pic, (x-200,50))
-            elif self.battle_pic != None and self.battle_pic == Ken_pic:
-                screen.blit(self.battle_pic, (x-200,y))
-            elif self.battle_pic != None and self.battle_pic == Grace_pic:
-                screen.blit(self.battle_pic, (x-200,y-100))
+            if self.battle_pic != None:
+                if self.battle_pic == Junia_pic and scene in ['choose2','0a','0b','0c']:
+                    screen.blit(self.battle_pic, (x-200,50))
+                elif self.battle_pic == Ken_pic and scene in ['choose2','0a','0b','0c']:
+                    screen.blit(self.battle_pic, (x-140,y))
+                elif self.battle_pic == Grace_pic and scene in ['choose2','0a','0b','0c']:
+                    screen.blit(self.battle_pic, (x-200,y-100))
+                else:
+                    screen.blit(self.battle_pic, (x,y))
 
         else:
             #if the character hasn't yet been defeated
             if self.health > 0:
                 #place character
-                if self.battle_pic != None and self.battle_pic != Junia_pic and self.battle_pic != Ken_pic and self.battle_pic != Grace_pic:
-                    screen.blit(self.battle_pic, (x,y))
-                elif self.battle_pic != None and self.battle_pic == Junia_pic:
-                    screen.blit(self.battle_pic, (x-200,50))
-                elif self.battle_pic != None and self.battle_pic == Ken_pic:
-                    screen.blit(self.battle_pic, (x-200,y))
-                elif self.battle_pic != None and self.battle_pic == Grace_pic:
-                    screen.blit(self.battle_pic, (x-200,y-100))
+                if self.battle_pic != None:
+                    if self.battle_pic == Junia_pic and scene in ['choose2','0a','0b','0c']:
+                        screen.blit(self.battle_pic, (x-200,50))
+                    elif self.battle_pic == Ken_pic and scene in ['choose2','0a','0b','0c']:
+                        screen.blit(self.battle_pic, (x-200,y))
+                    elif self.battle_pic == Grace_pic and scene in ['choose2','0a','0b','0c']:
+                        screen.blit(self.battle_pic, (x-200,y-100))
+                    else:
+                        screen.blit(self.battle_pic, (x,y))
                 #health bar
                 if self == Nightmare or self == NightmareC:
                     pygame.draw.rect(screen, health_bar_red, (x+80, y+40, 500, 10))
@@ -2449,6 +2451,7 @@ def customCharacter():
         g_move = input("Enter the name of your desired Guard move: ")
         r_move = input("Enter the name of your desired Recover move: ")
         picture = input("Enter the name of your character's sprite: ")
+        print()
         
         #make sure all entries are valid
         if (health.isdigit() and 50 <= int(health) <= 200 and energy.isdigit() and 30 <= int(energy) <= 150 and attack.isdigit() and 15 <= int(attack) <= 35
@@ -2497,9 +2500,7 @@ def customCharacter():
                     pygame.time.delay(500)
                     designing = False
         else:
-            designing = False
             print('Please try again.\n\n')
-            
         
 def randomCharacter():
     '''
@@ -2984,8 +2985,8 @@ def CustomBattle(character1,character2,background,battle_name,music): #{TO UPDAT
                 character1.BattlePosition(0, SCREEN_HEIGHT-550)
                 character2.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-500)
             elif (character2 == Overlord or character2 == OverlordC) and character1 != OverlordC and character1 != Overlord and character1 != HydranoidC and character1 != Hydranoid:
-                character1.BattlePosition(0, SCREEN_HEIGHT-550)
-                character2.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-500)
+                character1.BattlePosition(0, SCREEN_HEIGHT-500)
+                character2.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-550)
             elif (character1 == OverlordC or character1 == Overlord) and (character2 == Overlord or character2 == OverlordC):
                 character1.BattlePosition(0, SCREEN_HEIGHT-550)
                 character2.BattlePosition(SCREEN_WIDTH-600, SCREEN_HEIGHT-550)
@@ -3632,111 +3633,6 @@ while True:
                         playMusic(press_button_sound,'sound')
                         pass
                     
-                    elif scene == 'scene_7':
-                        dialogue_index += 1 
-                        playMusic(press_button_sound,'sound')
-                        pass
-                    
-                    elif scene == 'scene_8':
-                        dialogue_index += 1 
-                        playMusic(press_button_sound,'sound')
-                        pass
-                    
-                    elif scene == 'scene_9':
-                        dialogue_index += 1 
-                        playMusic(press_button_sound,'sound')
-                        pass
-                    
-                    elif scene == 'scene_10':
-                        dialogue_index += 1 
-                        playMusic(press_button_sound,'sound')
-                        pass
-                    
-                    elif scene == 'scene_11':
-                        dialogue_index += 1 
-                        playMusic(press_button_sound,'sound')
-                        pass
-                    
-                    elif scene == 'scene_12':
-                        dialogue_index += 1 
-                        playMusic(press_button_sound,'sound')
-                        pass
-                    
-                    elif scene == 'scene_13':
-                        dialogue_index += 1 
-                        playMusic(press_button_sound,'sound')
-                        pass
-                    
-                    elif scene == 'scene_14':
-                        dialogue_index += 1 
-                        playMusic(press_button_sound,'sound')
-                        pass
-                    
-                    elif scene == 'scene_15':
-                        dialogue_index += 1 
-                        playMusic(press_button_sound,'sound')
-                        pass
-                    
-                    elif scene == 'scene_16':
-                        dialogue_index += 1 
-                        playMusic(press_button_sound,'sound')
-                        pass
-                    
-                    elif scene == 'scene_17':
-                        dialogue_index += 1 
-                        playMusic(press_button_sound,'sound')
-                        pass
-                    
-                    elif scene == 'scene_18':
-                        dialogue_index += 1 
-                        playMusic(press_button_sound,'sound')
-                        pass
-                    
-                    elif scene == 'scene_19':
-                        dialogue_index += 1 
-                        playMusic(press_button_sound,'sound')
-                        pass
-                    
-                    elif scene == 'scene_20':
-                        dialogue_index += 1 
-                        playMusic(press_button_sound,'sound')
-                        pass
-                    
-                    elif scene == 'scene_21':
-                        dialogue_index += 1 
-                        playMusic(press_button_sound,'sound')
-                        pass
-                    
-                    elif scene == 'scene_22':
-                        dialogue_index += 1 
-                        playMusic(press_button_sound,'sound')
-                        pass
-                    
-                    elif scene == 'scene_23':
-                        dialogue_index += 1 
-                        playMusic(press_button_sound,'sound')
-                        pass
-                    
-                    elif scene == 'scene_24':
-                        dialogue_index += 1 
-                        playMusic(press_button_sound,'sound')
-                        pass
-                    
-                    elif scene == 'scene_25':
-                        dialogue_index += 1 
-                        playMusic(press_button_sound,'sound')
-                        pass
-                    
-                    elif scene == 'scene_26':
-                        dialogue_index += 1 
-                        playMusic(press_button_sound,'sound')
-                        pass
-                    
-                    elif scene == 'scene_27':
-                        dialogue_index += 1 
-                        playMusic(press_button_sound,'sound')
-                        pass
-                    
                 if event.key == pygame.K_BACKSPACE:  # On Backspace key
                     if dialogue_index > 0:
                         playMusic(press_button_sound,'sound')
@@ -3859,125 +3755,6 @@ while True:
         ExceedraMain.BattlePosition(100, 200)
         Hydranoid.BattlePosition(400,100)
         make_text('EPISODE 2 WILL BE READY SOON! :)',"comicsansms",65,white,SCREEN_WIDTH/2,SCREEN_HEIGHT/2)
-    
-    #episode 2, scene 1 battle: Hydranoid VS The Hunter
-    elif scene == 'battle_e2_s1': #outside
-        Battle(HydranoidC,HunterC,school_outside,'battle_e2_s1',NightmareBattle)
-    
-    elif scene == 'scene_7':
-        #placements
-        pass
-    
-    #episode 2, scene 3 battle: Destiny VS Akobos
-    elif scene == 'battle_e2_s2':
-        Battle(Destiny,AkobosC,warehouse,'battle_e2_s2',AkobosBattle)
-    
-    elif scene == 'scene_8':
-        pass
-    
-    elif scene == 'scene_9':
-        pass
-    
-    #episode 2, scene 4 battle: Dark Exceedra VS Overlord
-    elif scene == 'battle_e2_s4':
-        Battle(ExceedraDark1,Overlord,dreamspace,'battle_e2_s4',OverlordBattle)
-    
-    elif scene == "scene_10":
-        pass
-    
-    elif scene == 'scene_11':
-        pass
-    
-    elif scene == 'battle_e2_s6':
-        Battle(ExceedraDark2,Abby,laboratory,'battle_e2_s6',DarkExceedraBattle)
-    
-    elif scene == 'scene_12':
-        pass
-    
-    elif scene == 'scene_13':
-        pass
-    
-    elif scene == 'scene_14':
-        pass
-    
-    elif scene == 'scene_15':
-        pass
-    
-    #episode 3, scene 4: (Dark) Exceedra VS Kyra
-    elif scene == 'battle_e3_s4':
-        Battle(ExceedraDark2,Kyra,exceedras_world_of_ice,'battle_e3_s4',BattleTheme1)
-    
-    elif scene == 'scene_16':
-        pass
-    
-    elif scene == 'scene_17':
-        pass
-    
-    #episode 3, scene 5: Dark Exceedra VS Destiny
-    elif scene == 'battle_e3_s6':
-        Battle(ExceedraDark2,Destiny,in_between,'battle_e3_s6',Exceedra_VS_Destiny)
-    
-    elif scene == 'scene_18':
-        pass
-    
-    #episode 3, scene 7: (Dark) Exceedra VS Overlord (3 Phase Rematch)
-    elif scene == 'battle_e3_s7_1':
-        BattleRush(ExceedraMain2,OverlordC,dreamspace,'battle_e3_s7_1',OverlordBattle,for_story=True)
-    elif scene == 'battle_e3_s7_2':
-        BattleRush(ExceedraMain2,OverlordSoulC,dreamspace,'battle_e3_s7_2',OverlordSoulBattle,for_story=True)
-    elif scene == 'battle_e3_s7_3':
-        BattleRush(ExceedraMain2,OroborusTerminaC,dreamspace,'battle_e3_s7_3',OroborusTerminaBattle,for_story=True)
-    
-    elif scene == 'scene_19':
-        pass
-    
-    elif scene == 'scene_20':
-        pass
-    
-    elif scene == 'scene_21':
-        pass
-    
-    #final episode, scene 3: Exceedra and Kyra VS Monster 1
-    elif scene == 'battle_e4_s3':
-        Battle2Chars(ExceedraMain2,Kyra,Monster1,exceedras_world_of_ice,'battle_e4_s3',MonsterBattle)
-    
-    elif scene == 'scene_22':
-        pass
-    
-    #final episode, scene 4: Exceedra and Kyra VS Monster 2
-    elif scene == 'battle_e4_s4':
-        Battle2Chars(ExceedraMain2,Kyra,Monster2,fire_plain,'battle_e4_s4',MonsterBattle)
-    
-    elif scene == 'scene_23':
-        pass
-    
-    elif scene == 'scene_24':
-        pass
-    
-    #final episode, scene 6: Exceedra and Kyra VS many bosses (Akobos, Nightmare, Hunter, Oroborus Termina)
-    elif scene == 'battle_e4_s6_1':
-        BattleRush2(ExceedraMain2,Kyra,Akobos,grass_plain,'battle_e4_s6_1',AkobosBattle,for_story=True)
-    elif scene == 'battle_e4_s6_2':
-        BattleRush2(ExceedraMain2,Kyra,Nightmare,grass_plain,'battle_e4_s6_2',NightmareBattle,for_story=True)
-    elif scene == 'battle_e4_s6_3':
-        BattleRush2(ExceedraMain2,Kyra,Hunter,grass_plain,'battle_e4_s6_3',NightmareBattle,for_story=True)
-    elif scene == 'battle_e4_s6_4':
-        BattleRush2(ExceedraMain2,Kyra,OroborusTermina,grass_plain,'battle_e4_s6_4',OroborusTerminaBattle,for_story=True)
-    
-    elif scene == 'scene_25':
-        pass
-    
-    #final episode, scene 7: Exceedra, Kyra and Akobos vs Guardian AI
-    elif scene == 'battle_e4_s7_1':
-        BattleRush3(ExceedraMain2,Kyra,AkobosC,AI,grass_plain2,laboratory,'battle_e4_s7_1',AIBattle1,True)
-    elif scene == 'battle_e4_s7_2':
-        BattleRush3(ExceedraMain2,Kyra,AkobosC,AI_2,grass_plain2,laboratory,'battle_e4_s7_2',AIBattle2,True)
-    
-    elif scene == 'scene_26':
-        pass
-    
-    elif scene == 'scene_27':
-        pass
     
     #credits when the game is completed (after Game_completed is made True)
     elif scene == 'credits':
